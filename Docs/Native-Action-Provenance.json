@@ -1,0 +1,15 @@
+{
+  "note": "CPU-only interval, composition, easing and sprite-frame timing algorithms adapted to native MRNode/MRSprite. Follow/camera actions remain excluded. Original MIT licenses are retained in adapted files. No Cocos headers, libraries or rendering implementations are used.",
+  "sourceSHA256": {
+    "CCAction.h": "b8edde84557f82897274d1b25f5168238192249adaf2f5aeb1ab56cc352cfab2",
+    "CCAction.m": "2ed791296ea368722b4268c929c78d295a99b2a94f8b1d2f258c295f2d90e781",
+    "CCActionInterval.h": "b8d3ae171fa06ed2f071623e7b086e412331c05cc00cecb0654420cf34433ee6",
+    "CCActionInterval.m": "78fccbe20dc0a1d885d7f963db41fbb5a08cd50fb3d9f83835cf350f0d81a722",
+    "CCActionInstant.h": "5c3276ef1d4023775874991e2e734ee6f0f1cea7483b9e2fb2bcc32beb024b5a",
+    "CCActionInstant.m": "63f9ca0fdfe4c3058440bff6ebb90e8f52b80c114cc9ce5a045ea78225a4c37a",
+    "CCActionEase.h": "0c33625b6c0e32b4691ca77e1dd3127466772b4bef637748fda994267a01118e",
+    "CCActionEase.m": "6e42f0d7d07f1fac09a3183a6a440da538d3446b0701e0296dd60416fc70d28d",
+    "CCAnimation.h": "241909067da8681a8625a8ea9f42ecb49e77683b51b84c3ba8e3dd76c22482bc",
+    "CCAnimation.m": "8dc0d602075fc459deb1f269467cb90056e001a6ac9ac0dee6531cbb2eccf288"
+  }
+}

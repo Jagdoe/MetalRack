@@ -50,3 +50,32 @@ The shader is copied as a file rather than as a folder named `Resources`, avoidi
 an ambiguous bundle layout that fails Xcode iOS code signing. The loader also
 accepts the older nested location. This packaging fix changes no rendering APIs,
 shader contents or application policy.
+
+## Selection outlines
+
+The MetalRack product includes the Objective-C/C-compatible
+`MetalRackImageProcessing` module. `MRCreateOutlineMask` accepts an RGBA8
+silhouette and produces a binary white circular dilation minus its solid
+pixels, including outlines around holes. Alpha 128 is the solid threshold;
+radius is in source pixels. The caller supplies non-overlapping buffers of
+`width * height * 4` bytes with positive dimensions and a nonnegative radius.
+Input and output use the same row order. Games own selection rules, tint,
+logical thickness, scene capture and placement; the shared package owns the
+outline pixel operation. The implementation has no Cocos, SoapRack or game
+imports. `swift test` checks it against geometric nearest-pixel distances.
+
+## Native scene and UI APIs
+
+`MetalRackScene` supplies native Objective-C scene nodes, sprites, explicit-density
+atlases, actions, scheduling, Core Text glyph layout, pointer capture, clipping,
+selection outlines and offscreen capture. `MetalRack` supplies their Metal backend
+(`SceneRenderer`) and UIKit host (`SceneView`). `MetalRackUI` adds definition-driven
+sprites, controls, panels, scrolling, transitions, particles, audio and service
+helpers used by Gnomes. These targets contain no Cocos rendering or OpenGL state
+emulation. The older `MetalRack` snapshot/quad APIs remain available unchanged.
+
+See [native integration](Docs/Native-Scene-Migration.md) for ownership, coordinate,
+lifecycle, resource and validation contracts. Gnomes supplies artwork, fonts,
+definitions, UI layout, lighting formulas and simulation. Persisted definition
+class names can be mapped explicitly to native classes without retaining an old
+scene graph. Original SoapRack sources are not modified by this package.

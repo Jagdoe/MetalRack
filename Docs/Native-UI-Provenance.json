@@ -1,0 +1,601 @@
+[
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRSceneHost.m",
+    "source": "Native integration API",
+    "adaptationInputSHA256": "54189b6701125258284c3bd37180e4296748e7cfc3c8d3e68ada28f1165cdcca"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRPagedScene.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/Scenes/PagedScene.m",
+    "sourceSHA256": "6abb1d6f583db960ec2fe8096aeb4ccbf167e8f9af3acabccb9df7b4c61b4aa7",
+    "adaptationInputSHA256": "8e0a694b1e703c4a0915486a74c4417bae3618fdec14ede0049149149d110ab1"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRScrollScene.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/Scenes/ScrollScene.m",
+    "sourceSHA256": "e67790e4a9fddd640590611ba224c552e236444484cb9909e55814880cffc7ed",
+    "adaptationInputSHA256": "55ae5e54c6bc39f1554534411cc95155551541578e1226e2307a3850c50884a3"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRPlacementScene.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/Scenes/PlacementScene.m",
+    "sourceSHA256": "5a6a75c564e6a6454704d75ba0f8d99803562d44262cb32c8bed27a38e5a97e3",
+    "adaptationInputSHA256": "f02e965d8c736cf39152b940ee39f08939aeebba8742a4f77d89dabc51467a1c"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/NSMutableDictionary+Union.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/NSMutableDictionary+Union.m",
+    "sourceSHA256": "a66735e485fdb1f868e1cc405dd604c0bfb5c7341184763a7548979d3a36c371",
+    "adaptationInputSHA256": "6899e0b1c92b0f333bb086de27a825f3c501ec025385a32fefdb5dab8bce0759"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRDefinitions.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/DefsManager.m",
+    "sourceSHA256": "139684cd3ce1e0a627547b3fc2d7fc27ba17a4bfc4d9a7ee2e8f069b1c855576",
+    "adaptationInputSHA256": "d5acd459b90c6914cda4c4cb002b9d2f865e7b47a14f71a36f63869750023f00"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRPointValue.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/CGPointOb.m",
+    "sourceSHA256": "07d3b5697d81a35de742d81e3fd4af1252cfad37efb4bfaae194f709cf9178e5",
+    "adaptationInputSHA256": "4eb6c27d804c20c3065ff248f9f84078c899ed62b1b27e682c2adb5860725b0c"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRNotifications.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/NotificationManager.m",
+    "sourceSHA256": "9ab03a45a6d0df0544a29c6c0a4cf33955c663f9d56f7458b1873c7fe82d4b3d",
+    "adaptationInputSHA256": "5176f4ff3d1ef4a3cf3f2fe095c640c9454c9d69a692e9f7c2edac0251733ed4"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/NSDictionary+DeepCopy.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/NSDictionary+DeepCopy.m",
+    "sourceSHA256": "84c06e36fcbc4cec7bec20d01adf0ec638c0d293827beb94791700825c7c2d01",
+    "adaptationInputSHA256": "f9d4670e530bad136718bacf33cfdc49998bad660d971bf85db3d624bb6645c5"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRValues.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/ISMisc.m",
+    "sourceSHA256": "fca2194584d30fe3e47ed13619ccd7341e81333a4aecb2e79f315304bec0cbeb",
+    "adaptationInputSHA256": "4dbbc688f20ad55370ea3c2f18b140bfc9c4d03b34a683c41d8c9f75c292ae94"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRContextHelp.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/ContextHelp.m",
+    "sourceSHA256": "deedb04b6f8c89f0fba1f8061677bb0090aebedd307813fb9cd873a34a9f9d09",
+    "adaptationInputSHA256": "24fb8716822a3c92f20e4a7942a9c6ca37836c7708da51bd48fa21cb2b98228a"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRSelector.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/SelectorObject.m",
+    "sourceSHA256": "ba86284403701aaff1d27fd903a7858401b8e801617c999bab227724ffcdeb80",
+    "adaptationInputSHA256": "d623b851c8df0bdfdb808991ed5f5412a110ae62a457e90ef3ef97f46ffe7665"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRSocialService.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/FBManager.m",
+    "sourceSHA256": "c5c504132651396c10e8270a36acd16aed1f0360ab46ef5adab0ee74bb1828cb",
+    "adaptationInputSHA256": "d71d21e32714c11a5872fe6ebee42b076cd25637357772b08d439774a136a102"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRGridPoint.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/GridPointObject.m",
+    "sourceSHA256": "d0b73ea00a18bb96b895707b13cef5e5dfe428b33aeb78a08b002283fcf1a7bb",
+    "adaptationInputSHA256": "a62afb9b79f4df66a2bcc67ccad3ae4c18fcf6668aa350a2b1eeff73e7a8985e"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRCurrencyStore.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/CurrencyManager.m",
+    "sourceSHA256": "fe3c09d0e6f5f7ac886d0cbe289bae1c3af9b29519278a142d7eaccf3f34b419",
+    "adaptationInputSHA256": "163c7acf76c0148ead2252be4e767dcf2df28698264362de891c4cc77dfeb8be"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRFileCache.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/FileCache.m",
+    "sourceSHA256": "ac96e2f6065cafb7e62bbac729f838974e6c90b1eb6a0ad1a06027e1d28af7ef",
+    "adaptationInputSHA256": "f52d3ba257372b3cd28e730cc746d813f11f5ffcd6ac0bdfa4d385d20534b59c"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRUtilities.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/UtilityManager.m",
+    "sourceSHA256": "38d36eba0d18f2ddedb1f399052f50f118f988b024e0c827023366c1051d82e4",
+    "adaptationInputSHA256": "fd96b06ec1cccb16156e12079c6bf626efdc6c71b4771f92e327a63b92ea8cee"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRInputLayer.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/Layers/TouchLayer.m",
+    "sourceSHA256": "0fb1e581d61d9aba38c72b3305d804b5c34b3dcaa00fcb11506e35712d5e511d",
+    "adaptationInputSHA256": "55c9f726a8c58414d3c75d61469d46da22652d0528350fa3eded9c5ae9d8a051"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRCullLayer.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/Layers/C2DLayerCull.m",
+    "sourceSHA256": "8a35dcc5b04cca48cbeb5020ebfda969de2a028140d2eca27c0aaf014bf31bdf",
+    "adaptationInputSHA256": "8f225fd54439c74e145159c1e2f694201ad53805f415ae26dc715c93f64b01f9"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRGestureLayer.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/Layers/TouchLadderLayer.m",
+    "sourceSHA256": "1dfa844d6cd8fa4ce6a7821981079c9020f18661683e474d62f350aadd937b24",
+    "adaptationInputSHA256": "90ef8f7b8c77d602fe99537f787af7a52b18300d9ca8446291cf5df8fbbb9e05"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRDefinitionSprite.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DSprite.h",
+    "sourceSHA256": "73e639ca1d3e586328cb5626be2fd9f2a3fbdb9f6c23d28c4630b6d0cdafb475",
+    "adaptationInputSHA256": "73e639ca1d3e586328cb5626be2fd9f2a3fbdb9f6c23d28c4630b6d0cdafb475"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRSlider.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DSlider.h",
+    "sourceSHA256": "64982adac690b1b46ffbba1ff8f0aaa435f623296f20b78046eaad7aa58f612e",
+    "adaptationInputSHA256": "64982adac690b1b46ffbba1ff8f0aaa435f623296f20b78046eaad7aa58f612e"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/2DMath.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/2DMath.h",
+    "sourceSHA256": "f359d5fadd79a0b113aa21b18ff062a07619a1e9b4f6982e1dd8a1fbdefe19d8",
+    "adaptationInputSHA256": "f359d5fadd79a0b113aa21b18ff062a07619a1e9b4f6982e1dd8a1fbdefe19d8"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRPanel.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DPanel.h",
+    "sourceSHA256": "4b098c80f435d01dd49e5c6b5b3d67a62b5e3ed5ca122af8fdbcefd760b38b33",
+    "adaptationInputSHA256": "4b098c80f435d01dd49e5c6b5b3d67a62b5e3ed5ca122af8fdbcefd760b38b33"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRGridPoint.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/GridPointObject.h",
+    "sourceSHA256": "8f86dfc4c5f3baec9ba17ff8a71a362d40f0f3f4bdd72f6098d2743fc2edc05c",
+    "adaptationInputSHA256": "b622e9b77f43e5aef88bf2cca3227071e3ed4343d7963e0ada4be0f3a336a34c"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRButton.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DButton.h",
+    "sourceSHA256": "6ef3d664220075147e94fab2a2cce8bf55e8b13dc1361b4a9725ca6fa7454874",
+    "adaptationInputSHA256": "6ef3d664220075147e94fab2a2cce8bf55e8b13dc1361b4a9725ca6fa7454874"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MROpenAL.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/audio/MyOpenAL.h",
+    "sourceSHA256": "969116992d7b006892351349343dcd1e9b07fabb0c66e31afafff4b7df7a8a23",
+    "adaptationInputSHA256": "969116992d7b006892351349343dcd1e9b07fabb0c66e31afafff4b7df7a8a23"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRAudio.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/audio/AudioManager.h",
+    "sourceSHA256": "2a9baf2f3f5494530fdc9b5bb422a297853acf0aabfbde77c393828ab11f84f4",
+    "adaptationInputSHA256": "2a9baf2f3f5494530fdc9b5bb422a297853acf0aabfbde77c393828ab11f84f4"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRTextLabel.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DText.h",
+    "sourceSHA256": "3b8306d2202b3135074f8ada9e7172bab20bf31d539df55997761cff12350784",
+    "adaptationInputSHA256": "3b8306d2202b3135074f8ada9e7172bab20bf31d539df55997761cff12350784"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRCullLayer.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/Layers/C2DLayerCull.h",
+    "sourceSHA256": "5249c6f5b025447ac98fd63553fb1973e9a59f30e210a7d5cd92cd9b8e658e4b",
+    "adaptationInputSHA256": "5249c6f5b025447ac98fd63553fb1973e9a59f30e210a7d5cd92cd9b8e658e4b"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MREffect.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DEffect.h",
+    "sourceSHA256": "be79945e8daa9435e29f0ea064c064c59f434ceda6c1f2b69c352a78f587b6bf",
+    "adaptationInputSHA256": "be79945e8daa9435e29f0ea064c064c59f434ceda6c1f2b69c352a78f587b6bf"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRSceneHost.h",
+    "source": "Native integration API",
+    "adaptationInputSHA256": "00d14bd3cde0791c3c705db6370d444a74abfc027ae04555b1dae61b366a3eb3"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRCurrencyStore.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/CurrencyManager.h",
+    "sourceSHA256": "b7f6a8168717a00b6644dce2575ae0f48bf28223cb708431759857eb4ccda11f",
+    "adaptationInputSHA256": "b7f6a8168717a00b6644dce2575ae0f48bf28223cb708431759857eb4ccda11f"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRPlacementScene.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/Scenes/PlacementScene.h",
+    "sourceSHA256": "29b4d90018f8ba95f9dbbd9ba05e036cff98e770a2b8310439c888175f9ad01a",
+    "adaptationInputSHA256": "d09617cf66a38a0860f67907434ff0109cd01c31cf0678e61e6a5bf8f019c4f5"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRSceneConfiguration.h",
+    "source": "Native integration API",
+    "adaptationInputSHA256": "414107bf2967f9c22ace7f87139079908f6319730c3cf93ecce299e1ae99d20e"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRUtilities.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/UtilityManager.h",
+    "sourceSHA256": "5e3c06e7f9d8757ff267a849a88c39a3f421bc6a59069c3898d2fc6372d5f359",
+    "adaptationInputSHA256": "39fceea0dd3daee4728776387e19575bf6f91f96ba644e9180698deaee44f48e"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRDragObject.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DDragObject.h",
+    "sourceSHA256": "a3445ff1e827d44132f12d71bdd86525d9d277c02abef8adaf9ceca00bcca5de",
+    "adaptationInputSHA256": "a3445ff1e827d44132f12d71bdd86525d9d277c02abef8adaf9ceca00bcca5de"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRFileCache.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/FileCache.h",
+    "sourceSHA256": "18e9351b4d4bdf4f0ac0ce4910670608240937f942306058b3b2f65d37292615",
+    "adaptationInputSHA256": "18e9351b4d4bdf4f0ac0ce4910670608240937f942306058b3b2f65d37292615"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRGestureLayer.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/Layers/TouchLadderLayer.h",
+    "sourceSHA256": "b0a7183ec809d5e2965538d8809846eb56a192ac92841ae2906e291cf4ff7ed8",
+    "adaptationInputSHA256": "b0a7183ec809d5e2965538d8809846eb56a192ac92841ae2906e291cf4ff7ed8"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRPointValue.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/CGPointOb.h",
+    "sourceSHA256": "214af40f7ef85df3f3a287cef9d9ef1b3e501bbe10d358ff425ca5f61cc324a5",
+    "adaptationInputSHA256": "214af40f7ef85df3f3a287cef9d9ef1b3e501bbe10d358ff425ca5f61cc324a5"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRCashView.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DCash.h",
+    "sourceSHA256": "b47d882265bec2f4f4fe8e9124512599e61abbb4506e9c373b80a1855a4413aa",
+    "adaptationInputSHA256": "b47d882265bec2f4f4fe8e9124512599e61abbb4506e9c373b80a1855a4413aa"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRDefinitions.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/DefsManager.h",
+    "sourceSHA256": "a068f569084c4cfada45476d68cf02fc724b1cc4c5b3dda7fbc0ccfa1845a3cb",
+    "adaptationInputSHA256": "5f2daef839426d4d46bc240aec14cb75de0d5eafc5a31c8991bb3d72f394556d"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRCheckbox.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DCheckbox.h",
+    "sourceSHA256": "259296f4b9da3e24ec5a365ce5774cac94879e1ffb006c0baf062256818acf7c",
+    "adaptationInputSHA256": "259296f4b9da3e24ec5a365ce5774cac94879e1ffb006c0baf062256818acf7c"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRLineLayer.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DLayerLine.h",
+    "sourceSHA256": "bfffcf0461eb81c32a4145cee4020a7d75cae5a4c09d9de8d29ee6885f839c2a",
+    "adaptationInputSHA256": "8e6d8044c25fdb4123d4f9e9eb37e0ef38a0e5795c669942b9d7932a9337764e"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/NSMutableDictionary+Union.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/NSMutableDictionary+Union.h",
+    "sourceSHA256": "18a5b4e90b81cc62128fba503191f8863b890c23e7e3db4fefe6097563610d0d",
+    "adaptationInputSHA256": "18a5b4e90b81cc62128fba503191f8863b890c23e7e3db4fefe6097563610d0d"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/NSDictionary+DeepCopy.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/NSDictionary+DeepCopy.h",
+    "sourceSHA256": "085924229089e11adf9bddee8f4bda5945bac3e7dfdd37a13d4857391673e7f1",
+    "adaptationInputSHA256": "085924229089e11adf9bddee8f4bda5945bac3e7dfdd37a13d4857391673e7f1"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRNotifications.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/NotificationManager.h",
+    "sourceSHA256": "b5e37b5bf2d67ca270e53379e0ff740ece3024a939ccd6ab25d3db12810f9a9e",
+    "adaptationInputSHA256": "b5e37b5bf2d67ca270e53379e0ff740ece3024a939ccd6ab25d3db12810f9a9e"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRSpriteEffect.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DSpriteEffect.h",
+    "sourceSHA256": "597f9f62754611be43b399eb2ec50021541daba8a665d7af4067ea6686a4c610",
+    "adaptationInputSHA256": "597f9f62754611be43b399eb2ec50021541daba8a665d7af4067ea6686a4c610"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRInputLayer.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/Layers/TouchLayer.h",
+    "sourceSHA256": "8abd1608aac596c548b1b8427618d4228c241615089a2f20256b4575c46af9f9",
+    "adaptationInputSHA256": "8abd1608aac596c548b1b8427618d4228c241615089a2f20256b4575c46af9f9"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRPagedScene.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/Scenes/PagedScene.h",
+    "sourceSHA256": "625d03b0f762fd8f72fa2c986254461773b504d221b032d9bf04f04e92356db8",
+    "adaptationInputSHA256": "625d03b0f762fd8f72fa2c986254461773b504d221b032d9bf04f04e92356db8"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRValues.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/ISMisc.h",
+    "sourceSHA256": "e6cc510e0ecc636784ef76e811a181b510c967e1d275568f2d9422f323913b50",
+    "adaptationInputSHA256": "e6cc510e0ecc636784ef76e811a181b510c967e1d275568f2d9422f323913b50"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRToolbar.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DToolbar.h",
+    "sourceSHA256": "579d364e7647dbf17330fbc2fc49590bc98a432a6a0de4fdd3615f6372258830",
+    "adaptationInputSHA256": "579d364e7647dbf17330fbc2fc49590bc98a432a6a0de4fdd3615f6372258830"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRBitmapFont.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DFont.h",
+    "sourceSHA256": "1e3102843d50347142d01724499aaa476a980e175100616c80e93fe9e52f1187",
+    "adaptationInputSHA256": "1e3102843d50347142d01724499aaa476a980e175100616c80e93fe9e52f1187"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRSocialService.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/FBManager.h",
+    "sourceSHA256": "51c29133551b5f6be78460c83011b756c46ece9bfe53cb9a3e0980e71b0acec7",
+    "adaptationInputSHA256": "51c29133551b5f6be78460c83011b756c46ece9bfe53cb9a3e0980e71b0acec7"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRProgressBar.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DProgressBar.h",
+    "sourceSHA256": "8843903e9ad4f1c6faf143ada2e024f0b43a1c8335161f8b12288cf097b43dd3",
+    "adaptationInputSHA256": "aedf3802a6bb67d926954c308f87d2bfd45b82f3c26311f95f10f849fea0a72a"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRSizeAction.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DAction.h",
+    "sourceSHA256": "32013a04b2b122622bf9043b599ef404806cdaf532021867f5afd970e8beebae",
+    "adaptationInputSHA256": "32013a04b2b122622bf9043b599ef404806cdaf532021867f5afd970e8beebae"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRScrollScene.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/Scenes/ScrollScene.h",
+    "sourceSHA256": "7d9c8539e1ead99bf6a6046856b875b9c0159b259509f43eac1a272ae0582a3b",
+    "adaptationInputSHA256": "7d9c8539e1ead99bf6a6046856b875b9c0159b259509f43eac1a272ae0582a3b"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRSelector.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/SelectorObject.h",
+    "sourceSHA256": "92b18e73c3a2aabd4cf2c520073b72ed30513d24b763db45e36986e5a5169144",
+    "adaptationInputSHA256": "92b18e73c3a2aabd4cf2c520073b72ed30513d24b763db45e36986e5a5169144"
+  },
+  {
+    "native": "Sources/MetalRackUI/include/MRContextHelp.h",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/core/ContextHelp.h",
+    "sourceSHA256": "baa4920c23bf927726d5fa2b346480d3f8ce23d2b842ee8e6aa1b105049bd2f7",
+    "adaptationInputSHA256": "baa4920c23bf927726d5fa2b346480d3f8ce23d2b842ee8e6aa1b105049bd2f7"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRCheckbox.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DCheckbox.m",
+    "sourceSHA256": "b0ac16cb59724c362f67011fdb1f2c507c09564982d5cd3278229928f2026a25",
+    "adaptationInputSHA256": "12e70a9104e9b579d511ee3e99ca09dd2fa74f43cd004534f0c5ba773ad6a0d0"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRLineLayer.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DLayerLine.m",
+    "sourceSHA256": "d249531fb2df67693c4a87532a1abe2e1839d30a5284a43dc8718b112916efed",
+    "adaptationInputSHA256": "47271c595661c9e8aa87955f1cc7a358163a5fd412e4af52c2d082dda4b52aea"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRCashView.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DCash.m",
+    "sourceSHA256": "5b4d5ece92f57e34236b65b5ee6690e887c2e0dec116d1e10a77e92ad070df93",
+    "adaptationInputSHA256": "6ef7b9fbb6745d4a93e61004b8a888dc0f2dd4b2baf7d8a6dd8abc81aa0b98cd"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRBitmapFont.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DFont.m",
+    "sourceSHA256": "84783ef2971463872ca2f5450cdfe7c0e097d801a1081b42c2736fd9020dd4f2",
+    "adaptationInputSHA256": "90e126aa2b241064c5a77262e7105d68addf468f2eb73f17b31cda3cb27f0dda"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRToolbar.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DToolbar.m",
+    "sourceSHA256": "c361b47614592c2c2804d6275293f887d8ec6c530abdd5e090009300331461fb",
+    "adaptationInputSHA256": "b96a0ced6c60f2244d28e620a6971cefe8784fbb5a4e4a43cfcc5d56dfbd5176"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRSpriteEffect.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DSpriteEffect.m",
+    "sourceSHA256": "74d824d6ca9de5ca165d4b07e6648b8d4cabfeb28055bf5d44cbe1bee36556fc",
+    "adaptationInputSHA256": "77b490e024b508ee24a0d6f497b2de82bbdec48028285fd0edd4fef6ae75af3a"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRProgressBar.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DProgressBar.m",
+    "sourceSHA256": "1a55f4b96710865806ba509439d7a63c22e2514a16f5b54785959d8c01f6d4c9",
+    "adaptationInputSHA256": "e98131693d5a06b0470a47ee6bff7e896afb21d3fc8e65ac8ad420dc2801d460"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRSizeAction.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DAction.m",
+    "sourceSHA256": "93ffdb916122cef6a601a6b0b4fb16521e408c980ce898c9239e45e0ee50b053",
+    "adaptationInputSHA256": "74af0f6debe4ccc0bf431e300694b2847fa5a4064872492b3be2773d58f0dac6"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRSlider.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DSlider.m",
+    "sourceSHA256": "99f6fd4eb129150b7171762def57e09d7098cf2c3724653a860aa95fe022ba29",
+    "adaptationInputSHA256": "8d53c5c4d462e0689f8ae6c0a35b0017e56b7c6787b32303b3f13b9dc3f164a7"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRDefinitionSprite.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DSprite.m",
+    "sourceSHA256": "484601b6bcbc2f37dcb1cbd77071050d495a8ecae13c157236c5ad21c10af31d",
+    "adaptationInputSHA256": "dd2f1df8ac16860d7e11557d6028220ef42de70b82248960bd7f50b4f7b13c79"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRTextLabel.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DText.m",
+    "sourceSHA256": "6910e064a169efa9a3a36f08475656e397e936569bc39df47dd97874d75fd0a6",
+    "adaptationInputSHA256": "830dd1282be6a6868ad389fbaab3278626b7be648bac8b311dbed9c16ed6f786"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRButton.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DButton.m",
+    "sourceSHA256": "c95eb40b47d5b66bc4b8162d0abeaf60581612de5bfdcfb889914a7f0ca8a768",
+    "adaptationInputSHA256": "6687ebb7df5ccd5000db0ea6d9f4d0ed94523394f1babd69468b821570a94aa4"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRPanel.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DPanel.m",
+    "sourceSHA256": "4d29a723ace3aa406408bc1b135a369b9195ab8892b1962cf37e6ffaefb68f22",
+    "adaptationInputSHA256": "b531e666b3a7321fefee4e642b9f17f90175f484e7fce1add3f66acdf0f2b7fb"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MREffect.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DEffect.m",
+    "sourceSHA256": "60e98483bcab83ddc9ebafcc6915312d429984517e2ea5b695bf39b0a169735b",
+    "adaptationInputSHA256": "c1a4c6c2c930f74b3087e0956acf30d4fdc65d880ba6d1ba67c30a7167fb8199"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRDragObject.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/C2D/C2DDragObject.m",
+    "sourceSHA256": "4f49711ba34febf4b3a9d370b9588e259aff763dbf9bc87ca56474c7d3ddc421",
+    "adaptationInputSHA256": "584410697f0d4e24ddb67e3754c329c14548fa936bffee6d5c1b9bed27172d33"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MRAudio.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/audio/AudioManager.m",
+    "sourceSHA256": "5b63aff7a808330dd128c7f4bd1340e5f1c6c91437a5e3dea598acc1be26808c",
+    "adaptationInputSHA256": "877cad169491b2cf1121138fda9ac2269fd545367309fe5b721aa5c5a78f70eb"
+  },
+  {
+    "native": "Sources/MetalRackUI/Implementation/MROpenAL.m",
+    "sourceRepository": "https://github.com/tricket/Gnomes.git",
+    "sourceRevision": "a3c183beef6b69f2adcfad4f8c2b79e60d683805",
+    "source": "SoapRack/audio/MyOpenAL.m",
+    "sourceSHA256": "3b386ec7d87d2d3b70a0da2ec2fa1d328242c96369744c5cd13aab1d9d8fea0b",
+    "adaptationInputSHA256": "5e68aad15d9503347d00298588b821066079a38a15391337455438ee86649924"
+  }
+]

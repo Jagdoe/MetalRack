@@ -15,6 +15,17 @@ public final class QuadRenderer {
     public let device: MTLDevice
     public let pipelineState: MTLRenderPipelineState
     public let samplerState: MTLSamplerState
+    private let shaderSource: String
+    private let library: MTLLibrary
+    private struct PipelineKey: Hashable {
+        let source: MTLBlendFactor
+        let destination: MTLBlendFactor
+        let format: MTLPixelFormat
+        let fragmentSource: String?
+        let fragmentFunction: String
+    }
+    private var pipelines: [PipelineKey: MTLRenderPipelineState] = [:]
+    private var customLibraries: [String: MTLLibrary] = [:]
     private static let inlineVertexByteLimit = 4096
     private static let vertexBufferAlignment = 256
     private static let vertexBufferCount = 3
@@ -33,7 +44,8 @@ public final class QuadRenderer {
             ?? Bundle.module.url(forResource: "QuadShaders", withExtension: "txt", subdirectory: "Resources") else {
             throw MetalRackError.resource("QuadShaders.txt")
         }
-        let library = try device.makeLibrary(source: String(contentsOf: url, encoding: .utf8), options: nil)
+        shaderSource = try String(contentsOf: url, encoding: .utf8)
+        library = try device.makeLibrary(source: shaderSource, options: nil)
         let descriptor = MTLRenderPipelineDescriptor()
         descriptor.vertexFunction = library.makeFunction(name: "quadVertex")
         descriptor.fragmentFunction = library.makeFunction(name: "quadFragment")
@@ -55,16 +67,49 @@ public final class QuadRenderer {
     }
 
     public func encode(texture: MTLTexture, vertices: [Vertex], viewportSize: CGSize,
-                       encoder: MTLRenderCommandEncoder) {
+                       encoder: MTLRenderCommandEncoder, pipeline: MTLRenderPipelineState? = nil,
+                       sampler: MTLSamplerState? = nil) {
         guard !vertices.isEmpty, setVertexBuffer(vertices: vertices,
             length: MemoryLayout<Vertex>.stride * vertices.count, encoder: encoder, device: device) else { return }
-        encoder.setRenderPipelineState(pipelineState)
+        encoder.setRenderPipelineState(pipeline ?? pipelineState)
         var viewport = SIMD2<Float>(Float(viewportSize.width), Float(viewportSize.height))
         encoder.setVertexBytes(&viewport, length: MemoryLayout<SIMD2<Float>>.stride, index: 1)
         encoder.setFragmentTexture(texture, index: 0)
-        encoder.setFragmentSamplerState(samplerState, index: 0)
+        encoder.setFragmentSamplerState(sampler ?? samplerState, index: 0)
         encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
     }
+    /// Reuses the shared vertex ABI and uploader for alternate blends, target
+    /// formats, or application-supplied fragment shading. Fragment source can
+    /// refer to VertexOut from QuadShaders.txt; game lighting policy stays outside.
+    public func pipeline(source: MTLBlendFactor, destination: MTLBlendFactor,
+                         pixelFormat: MTLPixelFormat, fragmentSource: String? = nil,
+                         fragmentFunction: String = "quadFragment") throws -> MTLRenderPipelineState {
+        if source == .one && destination == .oneMinusSourceAlpha && pixelFormat == .bgra8Unorm && fragmentSource == nil && fragmentFunction == "quadFragment" {
+            return pipelineState
+        }
+        let key = PipelineKey(source: source, destination: destination, format: pixelFormat,
+                              fragmentSource: fragmentSource, fragmentFunction: fragmentFunction)
+        if let cached = pipelines[key] { return cached }
+        let shaders: MTLLibrary
+        if let fragmentSource {
+            if let cached = customLibraries[fragmentSource] { shaders = cached }
+            else {
+                shaders = try device.makeLibrary(source: shaderSource + "\n" + fragmentSource, options: nil)
+                customLibraries[fragmentSource] = shaders
+            }
+        } else { shaders = library }
+        let descriptor = MTLRenderPipelineDescriptor()
+        descriptor.vertexFunction = shaders.makeFunction(name: "quadVertex")
+        descriptor.fragmentFunction = shaders.makeFunction(name: fragmentFunction)
+        let color = descriptor.colorAttachments[0]!
+        color.pixelFormat = pixelFormat; color.isBlendingEnabled = true
+        color.sourceRGBBlendFactor = source; color.sourceAlphaBlendFactor = source
+        color.destinationRGBBlendFactor = destination; color.destinationAlphaBlendFactor = destination
+        let result = try device.makeRenderPipelineState(descriptor: descriptor)
+        pipelines[key] = result
+        return result
+    }
+
     public func beginFrame(commandBuffer: MTLCommandBuffer) {
         availableFrames.wait()
         let semaphore = availableFrames
