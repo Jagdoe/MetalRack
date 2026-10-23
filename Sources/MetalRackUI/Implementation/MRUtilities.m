@@ -12,6 +12,7 @@
 #import "MRUtilities.h"
 #import <MessageUI/MessageUI.h>
 #import "MRSceneHost.h"
+#include <math.h>
 #import "MRDefinitions.h"
 #import "MRCurrencyStore.h"
 #ifndef PROJECT_IGNORE_POPUPMANAGER
@@ -1191,6 +1192,10 @@ static int snDotCount = 0;
 
 + (float)getDeviceScaleAdjustment
 {
+    // Clients whose atlases already use canonical logical points can opt out
+    // of the historical tablet coordinate multiplier without changing others.
+    float configured=[[MRSceneHost option:@"deviceScaleAdjustment" fallback:nil] floatValue];
+    if (isfinite(configured) && configured>0) return configured;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
         return 2;
     else
