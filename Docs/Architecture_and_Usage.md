@@ -288,3 +288,13 @@ root. Copying the directory named `Resources` produced an ambiguous iOS bundle
 that failed Xcode code signing. QuadRenderer checks the bundle root first and
 retains the former nested lookup as a fallback. Shader bytes, rendering APIs and
 client responsibilities are unchanged.
+
+## Client-selected native UI coordinate scale
+
+MRSceneHost options may supply `deviceScaleAdjustment` as a positive finite
+number string. MRUtilities uses it for definition/layout point multipliers.
+This lets a client with canonical atlas logical geometry select `1` on tablets
+as well as phones. Omitting or supplying an invalid/zero/negative/non-finite
+value retains the previous phone=1/tablet=2 behavior. This option does not change
+texture density, atlas geometry, viewport transforms or native drawable pixels.
+The application still owns UI design and its artwork/point-space policy.
