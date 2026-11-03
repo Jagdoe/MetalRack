@@ -9,6 +9,7 @@
     NSMutableArray<MRAction *> *_actions;
     __weak MRNode *_parent;
     BOOL _leavingEnvironment;
+    NSArray<MRNode *> *_childSnapshot, *_orderedChildren;
 }
 @end
 @implementation MRNode
@@ -57,7 +58,14 @@
 - (MRNode *)getChildByTag:(NSInteger)tag { for (MRNode *child in _children) if (child.tag==tag) return child; return nil; }
 - (void)reorderChild:(MRNode *)child z:(NSInteger)z { NSParameterAssert(child.parent==self); child.zOrder=z; }
 - (MRNode *)parent { return _parent; }
-- (NSArray *)children { return ([_children copy]); }
+- (NSArray *)children {
+    if (!_childSnapshot) _childSnapshot=[_children copy];
+    return _childSnapshot;
+}
+- (void)setZOrder:(NSInteger)zOrder {
+    if (_zOrder==zOrder) return;
+    _zOrder=zOrder; MRNode *parent=_parent; if (parent) parent->_orderedChildren=nil;
+}
 - (void)addChild:(MRNode *)child { [self addChild:child z:child.zOrder]; }
 - (void)addChild:(MRNode *)child z:(NSInteger)z { [self addChild:child z:z tag:child.tag]; }
 - (void)addChild:(MRNode *)child z:(NSInteger)z tag:(NSInteger)tag {
@@ -66,16 +74,19 @@
     for (MRNode *ancestor=self; ancestor; ancestor=ancestor.parent)
         NSAssert(ancestor!=child,@"A scene tree cannot contain cycles");
     child.zOrder=z; child.tag=tag; [_children addObject:child]; child->_parent=self;
+    _childSnapshot=nil; _orderedChildren=nil;
     if (self.inScene) [child attachToEnvironment:_environment];
 }
 // Internal scene-root adoption keeps lifecycle/callback state continuous.
 - (void)mrRemoveChildPreservingAttachment:(MRNode *)child {
     if(child->_parent!=self)return;child->_parent=nil;[_children removeObjectIdenticalTo:child];
+    _childSnapshot=nil; _orderedChildren=nil;
 }
 - (void)removeChild:(MRNode *)child {
     if (child->_parent!=self) return;
     [child detachFromEnvironment];
     child->_parent=nil; [_children removeObjectIdenticalTo:child];
+    _childSnapshot=nil; _orderedChildren=nil;
 }
 - (void)removeChild:(MRNode *)child cleanup:(BOOL)cleanup {
     if (child.parent!=self) return;
@@ -149,16 +160,17 @@
             if ([_actions containsObject:action] && action.isDone) [self stopAction:action];
         }
     }
-    NSArray *children=([_children copy]);
+    NSArray *children=self.children;
     for (MRNode *child in children) if (child.parent==self) [child advanceTime:seconds];
 }
 - (void)visit:(MRRenderContext *)context {
     if (!_visible) return;
     [context pushTransform]; [context multiplyTransform:self.nodeToParentTransform];
     // Sorting a snapshot keeps visit safe when drawing detaches or reparents nodes.
-    NSArray *ordered=[_children sortedArrayWithOptions:NSSortStable usingComparator:^NSComparisonResult(MRNode *a,MRNode *b) {
+    if (!_orderedChildren) _orderedChildren=[_children sortedArrayWithOptions:NSSortStable usingComparator:^NSComparisonResult(MRNode *a,MRNode *b) {
         return a.zOrder<b.zOrder ? NSOrderedAscending : a.zOrder>b.zOrder ? NSOrderedDescending : NSOrderedSame;
     }];
+    NSArray *ordered=_orderedChildren;
     NSUInteger i=0;
     for (;i<ordered.count;i++) { MRNode *child=ordered[i]; if (child.zOrder>=0) break; if (child.parent==self) [child visit:context]; }
     [self draw:context];

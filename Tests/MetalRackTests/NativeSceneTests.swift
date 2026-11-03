@@ -10,6 +10,30 @@ private final class RecordingNode: MRNode {
 }
 
 final class NativeSceneTests: XCTestCase {
+    func testCachedChildOrderInvalidatesAndSnapshotsSurviveDrawMutation() {
+        let context = MRRenderContext(), root = RecordingNode(), a = RecordingNode(), b = RecordingNode()
+        root.name = "root"; a.name = "a"; b.name = "b"
+        var order: [String] = []
+        for node in [root,a,b] { node.record = { order.append($0) } }
+        root.addChild(a,z: 0); root.addChild(b,z: 0)
+        let original: [MRNode] = root.children
+        root.visit(context); root.visit(context)
+        XCTAssertEqual(order, ["root","a","b","root","a","b"])
+        order = []; b.zOrder = -1; root.visit(context)
+        XCTAssertEqual(order, ["b","root","a"])
+        order = []; root.record = { name in order.append(name); root.removeChild(a) }
+        root.visit(context)
+        XCTAssertEqual(order, ["b","root"])
+        XCTAssertEqual(original.count,2, "Caller-owned snapshots remain immutable")
+        XCTAssertEqual(root.children.count,1)
+        let other = RecordingNode(); other.name = "other"
+        a.record = { order.append($0) }; other.addChild(a)
+        root.record = { order.append($0) }; root.addChild(other)
+        order = []; root.visit(context)
+        XCTAssertEqual(order, ["b","root","a"])
+        root.removeAllChildren(withCleanup: true)
+        XCTAssertTrue(root.children.isEmpty)
+    }
     func testHierarchyTransformsAndStableDrawOrder() throws {
         let renderer = try SceneRenderer(device: XCTUnwrap(MTLCreateSystemDefaultDevice()))
         let context = MRRenderContext()
