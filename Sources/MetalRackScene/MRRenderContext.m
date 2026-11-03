@@ -11,7 +11,9 @@ static CGSize MRGetSize(NSValue *v) { CGSize r; [v getValue:&r size:sizeof(r)]; 
     MRRenderBackend _backend;
     CGAffineTransform _transform;
     CGRect _clipRect;
-    NSMutableArray *_transforms, *_clips, *_targets;
+    NSMutableData *_transforms;
+    NSUInteger _transformCount;
+    NSMutableArray *_clips, *_targets;
     uint32_t _nextTexture;
 }
 @end
@@ -25,7 +27,7 @@ static CGSize MRGetSize(NSValue *v) { CGSize r; [v getValue:&r size:sizeof(r)]; 
 }
 - (id)init {
     if ((self=[super init])) {
-        _transforms=[NSMutableArray new]; _clips=[NSMutableArray new]; _targets=[NSMutableArray new];
+        _transforms=[NSMutableData dataWithLength:16*sizeof(CGAffineTransform)]; _clips=[NSMutableArray new]; _targets=[NSMutableArray new];
         _transform=CGAffineTransformIdentity; _nextTexture=1;
     }
     return self;
@@ -39,15 +41,19 @@ static CGSize MRGetSize(NSValue *v) { CGSize r; [v getValue:&r size:sizeof(r)]; 
     NSParameterAssert(isfinite(size.width) && isfinite(size.height) && size.width>0 && size.height>0);
     NSAssert(!_targets.count,@"Unclosed scene render target");
     _logicalSize=size; _transform=CGAffineTransformIdentity; _clipRect=(CGRect){CGPointZero,size};
-    [_transforms removeAllObjects]; [_clips removeAllObjects];
+    _transformCount=0; [_clips removeAllObjects];
     _backend.beginFrame(_backend.context,size);
 }
 - (void)present { _backend.present(_backend.context); }
-- (void)pushTransform { [_transforms addObject:MRTransformValue(_transform)]; }
+- (void)pushTransform {
+    if ((_transformCount+1)*sizeof(CGAffineTransform)>_transforms.length)
+        _transforms.length=MAX(_transforms.length*2,(_transformCount+1)*sizeof(CGAffineTransform));
+    ((CGAffineTransform *)_transforms.mutableBytes)[_transformCount++]=_transform;
+}
 - (void)multiplyTransform:(CGAffineTransform)transform { _transform=CGAffineTransformConcat(transform,_transform); }
 - (void)popTransform {
-    NSAssert(_transforms.count,@"Unbalanced scene transform stack");
-    _transform=MRGetTransform([_transforms lastObject]); [_transforms removeLastObject];
+    NSAssert(_transformCount,@"Unbalanced scene transform stack");
+    _transform=((const CGAffineTransform *)_transforms.bytes)[--_transformCount];
 }
 - (void)pushClipRect:(CGRect)rect {
     [_clips addObject:MRRectValue(_clipRect)];
@@ -72,8 +78,11 @@ static CGSize MRGetSize(NSValue *v) { CGSize r; [v getValue:&r size:sizeof(r)]; 
 - (void)drawVertices:(const MRRenderVertex *)vertices count:(size_t)count
             texture:(uint32_t)texture blend:(MRBlendFunction)blend sampling:(MRTextureSampling)sampling {
     if (!count || CGRectIsNull(_clipRect) || CGRectIsEmpty(_clipRect)) return;
-    NSMutableData *data=[NSMutableData dataWithLength:sizeof(MRRenderVertex)*count];
-    MRRenderVertex *output=data.mutableBytes;
+    // The backend consumes vertices synchronously. Common quads need no heap buffer;
+    // stack storage remains independent even if a backend makes a nested draw.
+    MRRenderVertex quad[6];
+    NSMutableData *data=count>6 ? [NSMutableData dataWithLength:sizeof(MRRenderVertex)*count] : nil;
+    MRRenderVertex *output=count>6 ? data.mutableBytes : quad;
     for (size_t i=0;i<count;i++) {
         CGPoint p=CGPointApplyAffineTransform(CGPointMake(vertices[i].x,vertices[i].y),_transform);
         output[i]=vertices[i]; output[i].x=p.x; output[i].y=p.y;

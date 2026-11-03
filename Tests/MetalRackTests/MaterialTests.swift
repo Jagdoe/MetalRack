@@ -1,8 +1,59 @@
 import XCTest
 import MetalKit
+import MetalRackScene
 @testable import MetalRack
 
 final class MaterialTests: XCTestCase {
+    func testAdjacentCoalescingPreservesStateBoundariesAndVertexOrder() throws {
+        let renderer = try SceneRenderer(device: XCTUnwrap(MTLCreateSystemDefaultDevice()))
+        let image = try XCTUnwrap(renderer.device.makeTexture(descriptor: .texture2DDescriptor(pixelFormat: .rgba8Unorm,width: 1,height: 1,mipmapped: false)))
+        func batch(_ x: Float, _ material: UInt32 = 0, _ attributes: UInt32 = 0) -> SceneRenderer.Batch {
+            .init(material: material, attributes: attributes,
+                  vertices: Array(repeating: .init(position: SIMD2(x,0),texCoord: .zero,color: SIMD4(repeating: 1)), count: 3),
+                  texture: image,source: .one,destination: .oneMinusSourceAlpha,
+                  clip: CGRect(x: 0,y: 0,width: 1,height: 1),sampler: renderer.quads.samplerState)
+        }
+        renderer.enqueue(batch(1)); renderer.enqueue(batch(2))
+        XCTAssertEqual(renderer.batches.count,2,"The optimization is explicitly opt-in")
+        renderer.batches.removeAll(); renderer.coalescesAdjacentBatches = true
+        renderer.enqueue(batch(1)); renderer.enqueue(batch(2)); renderer.enqueue(batch(3,1))
+        renderer.enqueue(batch(4)); renderer.enqueue(batch(5,0,1))
+        XCTAssertEqual(renderer.batches.count,4)
+        XCTAssertEqual(renderer.batches[0].vertices.map(\.position.x),[1,1,1,2,2,2])
+        XCTAssertEqual(renderer.batches[1].vertices.map(\.position.x),[3,3,3])
+        XCTAssertEqual(renderer.batches[2].vertices.map(\.position.x),[4,4,4],"Never merge across an intervening draw")
+        XCTAssertEqual(renderer.batches[3].attributes,1)
+        let linear = renderer.sampler(minFilter: .linear,magFilter: .linear,sAddress: .clampToEdge,tAddress: .clampToEdge)
+        XCTAssertTrue(linear === renderer.sampler(minFilter: .linear,magFilter: .linear,sAddress: .clampToEdge,tAddress: .clampToEdge))
+        XCTAssertFalse(linear === renderer.sampler(minFilter: .nearest,magFilter: .linear,sAddress: .clampToEdge,tAddress: .clampToEdge))
+    }
+    func testCoalescedAlphaTrianglesMatchSeparateDrawPixels() throws {
+        let renderer = try SceneRenderer(device: XCTUnwrap(MTLCreateSystemDefaultDevice()))
+        let context = MRRenderContext(); renderer.attachNativeContext(context)
+        var white: UInt32 = .max
+        let image = MRTexture(context: context,width: 1,height: 1,rgba: &white)!
+        var pixels = [UInt8](repeating: 0,count: 4*4*4)
+        let target = pixels.withUnsafeBytes { MRTexture(context: context,width: 4,height: 4,rgba: $0.baseAddress!)! }
+        let frame = MRSpriteFrame(texture: image,pixelRect: CGRect(x: 0,y: 0,width: 1,height: 1),originalSize: CGSize(width: 1,height: 1),trimOffset: .zero,pixelsPerPoint: 1,rotated: false)!
+        let root = MRNode()
+        for color in [MRColor3B(r: 255,g: 0,b: 0),MRColor3B(r: 0,g: 0,b: 255)] {
+            let sprite = MRSprite(frame: frame)!; sprite.scale = 4; sprite.position = CGPoint(x: 2,y: 2)
+            sprite.color = color; sprite.opacity = 128; root.addChild(sprite)
+        }
+        var outputs: [[UInt8]] = []
+        for merged in [false,true] {
+            renderer.coalescesAdjacentBatches = merged
+            context.beginTarget(target.identifier,size: CGSize(width: 4,height: 4),clear: true,color: MRRenderColor(r: 0,g: 0,b: 0,a: 0))
+            root.visit(context)
+            XCTAssertEqual(renderer.batches.count,merged ? 1 : 2)
+            context.endTarget()
+            pixels.withUnsafeMutableBytes { context.readTexture(target.identifier,rect: CGRect(x: 0,y: 0,width: 4,height: 4),rgba: $0.baseAddress!) }
+            outputs.append(pixels)
+        }
+        XCTAssertEqual(outputs[0],outputs[1])
+        XCTAssertGreaterThan(outputs[1][(2*4+2)*4+2],UInt8(0))
+        renderer.detachNativeContext()
+    }
     func testEqualLengthShaderSourcesRemainDistinct() throws {
         let renderer = try QuadRenderer(device: XCTUnwrap(MTLCreateSystemDefaultDevice()))
         let red = "fragment float4 paint(VertexOut o [[stage_in]]) { return float4(1,0,0,1); }"

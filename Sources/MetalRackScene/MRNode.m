@@ -176,7 +176,7 @@
 }
 - (void)advanceTime:(float)seconds {
     NSParameterAssert(isfinite(seconds) && seconds>=0);
-    if (!_actionsPaused) {
+    if (!_actionsPaused && _actions.count) {
         NSArray *saved=([_actions copy]);
         for (MRAction *action in saved) {
             if (![_actions containsObject:action]) continue;

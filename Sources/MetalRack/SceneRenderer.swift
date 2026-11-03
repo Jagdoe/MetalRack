@@ -18,7 +18,7 @@ open class SceneRenderer: NSObject, MTKViewDelegate {
     public struct Batch {
         public var material: UInt32 = 0
         public var attributes: UInt32 = 0
-        public let vertices: [QuadRenderer.Vertex]
+        public var vertices: [QuadRenderer.Vertex]
         public let texture: MTLTexture
         public let source: MTLBlendFactor
         public let destination: MTLBlendFactor
@@ -34,13 +34,23 @@ open class SceneRenderer: NSObject, MTKViewDelegate {
             self.clip = clip; self.sampler = sampler; self.coordinateSize = coordinateSize
         }
     }
+    /// Opt in only when material uniforms depend on the shared batch state,
+    /// not on individual submission boundaries. Painter order is preserved.
+    public var coalescesAdjacentBatches = false
     public var batches: [Batch] = []
     public var screenBatches: [Batch] = []
     public var target: UInt32 = 0
     public var targetViewport = CGSize.zero
     public var targetClear: MTLClearColor?
     public var clear = MTLClearColorMake(0,0,0,1)
-    private var samplers: [String: MTLSamplerState] = [:]
+    private struct SamplerKey: Hashable {
+        let minFilter: MTLSamplerMinMagFilter
+        let magFilter: MTLSamplerMinMagFilter
+        let sAddress: MTLSamplerAddressMode
+        let tAddress: MTLSamplerAddressMode
+        let mipFilter: MTLSamplerMipFilter
+    }
+    private var samplers: [SamplerKey: MTLSamplerState] = [:]
     private var reportedDrawable = false
     private var nativeContext: MRRenderContext?
     private var nativeTargets: [(UInt32, CGSize)] = []
@@ -168,7 +178,7 @@ open class SceneRenderer: NSObject, MTKViewDelegate {
     }
     public func sampler(minFilter: MTLSamplerMinMagFilter, magFilter: MTLSamplerMinMagFilter,
                         sAddress: MTLSamplerAddressMode, tAddress: MTLSamplerAddressMode, mipFilter: MTLSamplerMipFilter = .notMipmapped) -> MTLSamplerState {
-        let key = "\(minFilter.rawValue),\(magFilter.rawValue),\(sAddress.rawValue),\(tAddress.rawValue),\(mipFilter.rawValue)"
+        let key = SamplerKey(minFilter: minFilter, magFilter: magFilter, sAddress: sAddress, tAddress: tAddress, mipFilter: mipFilter)
         if let cached = samplers[key] { return cached }
         let descriptor = MTLSamplerDescriptor()
         descriptor.minFilter = minFilter; descriptor.magFilter = magFilter; descriptor.mipFilter = mipFilter
@@ -263,7 +273,16 @@ open class SceneRenderer: NSObject, MTKViewDelegate {
         precondition(command.status == .completed,"Native mipmap generation failed")
         textures[name] = destination
     }
-    public func enqueue(_ batch: Batch) { batches.append(batch) }
+    public func enqueue(_ batch: Batch) {
+        if coalescesAdjacentBatches, batch.vertices.count.isMultiple(of: 3), let i = batches.indices.last,
+           batches[i].vertices.count.isMultiple(of: 3),
+           batches[i].material == batch.material, batches[i].attributes == batch.attributes,
+           batches[i].texture === batch.texture, batches[i].sampler === batch.sampler,
+           batches[i].source == batch.source, batches[i].destination == batch.destination,
+           batches[i].clip == batch.clip, batches[i].coordinateSize == batch.coordinateSize {
+            batches[i].vertices.append(contentsOf: batch.vertices)
+        } else { batches.append(batch) }
+    }
 
     public func readTexture(_ name: UInt32, x: Int32, y: Int32, width: Int32, height: Int32, pixels: UnsafeMutableRawPointer) {
     flushTarget()

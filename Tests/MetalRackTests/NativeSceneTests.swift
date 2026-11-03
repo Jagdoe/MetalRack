@@ -9,6 +9,28 @@ private final class RecordingNode: MRNode {
     override func draw(_ context: MRRenderContext!) { record?(name) }
 }
 
+private final class DrawReentryState {
+    let context: MRRenderContext
+    var values: [Float] = []
+    var nested = false
+    init(context: MRRenderContext) { self.context = context }
+    func draw(_ x: Float) {
+        var vertex = MRRenderVertex(x: x,y: 0,u: 0,v: 0,r: 1,g: 1,b: 1,a: 1)
+        context.drawVertices(&vertex,count: 1,texture: 1,
+                             blend: MRBlendFunction(src: MRBlendOne,dst: MRBlendZero),
+                             sampling: MRTextureSampling(minFilter: MRFilterLinear,magFilter: MRFilterLinear,sAddress: MRAddressClamp,tAddress: MRAddressClamp))
+    }
+    func run() {
+        context.beginFrame(with: CGSize(width: 10,height: 10))
+        context.pushClipRect(CGRect(x: 0,y: 0,width: 10,height: 10))
+        draw(1); context.popClipRect()
+    }
+    func receive(_ vertices: UnsafePointer<MRRenderVertex>, _ count: Int) {
+        values.append(vertices[0].x)
+        if !nested { nested = true; draw(9); values.append(vertices[0].x) }
+    }
+}
+
 final class NativeSceneTests: XCTestCase {
     func testCachedChildOrderInvalidatesAndSnapshotsSurviveDrawMutation() {
         let context = MRRenderContext(), root = RecordingNode(), a = RecordingNode(), b = RecordingNode()
@@ -73,6 +95,26 @@ final class NativeSceneTests: XCTestCase {
         var temporary: MRNode? = MRNode(); let retainedChild = MRNode()
         temporary!.position = CGPoint(x: 10,y: 20); temporary!.addChild(retainedChild); check(retainedChild)
         temporary = nil; XCTAssertNil(retainedChild.parent); check(retainedChild)
+    }
+    func testDeepTransformStackAndReentrantDrawBuffers() {
+        let context = MRRenderContext()
+        let original = context.transform
+        for _ in 0..<80 { context.pushTransform(); context.multiplyTransform(CGAffineTransform(translationX: 1,y: 2)) }
+        XCTAssertEqual(context.transform.tx,80); XCTAssertEqual(context.transform.ty,160)
+        for _ in 0..<80 { context.popTransform() }
+        XCTAssertEqual(context.transform,original)
+        var backend = MRRenderBackend()
+        backend.beginFrame = { _, _ in }; backend.present = { _ in }
+        backend.draw = { pointer, vertices, count, _, _, _, _, _ in
+            let state = Unmanaged<DrawReentryState>.fromOpaque(pointer!).takeUnretainedValue()
+            state.receive(vertices!,count)
+        }
+        let state = DrawReentryState(context: context)
+        backend.context = Unmanaged.passUnretained(state).toOpaque()
+        context.setBackend(backend)
+        state.run()
+        XCTAssertEqual(state.values,[1,9,1], "Nested draws must not overwrite the caller's vertices")
+        context.setBackend(MRRenderBackend())
     }
     func testHierarchyTransformsAndStableDrawOrder() throws {
         let renderer = try SceneRenderer(device: XCTUnwrap(MTLCreateSystemDefaultDevice()))
