@@ -1666,44 +1666,12 @@ static float sgflWindowHeight = 480.0f;
     [self updateWorldPositionCache];
     if (m_fUseCulling == YES)
     {
-        CGPoint position = m_positionInWorldCached;
-
-        CGSize size = [self contentSize];
-        float flWidth = size.width * self.scaleX;
-        float flHeight = size.height * self.scaleY;
-        CGPoint ptAnchor = [self anchorPoint];
-        // Off to the left.
-        if (position.x < -(flWidth * (1.0f - ptAnchor.x)))
-        {
-            return;
-        }
-        // Off to the right.
-        if (position.x > (sgflWindowWidth + (flWidth * ptAnchor.x)))
-        {
-            return;
-        }
-
-        // Off to the bottom.
-        if (position.y < -(flHeight * (1.0f - ptAnchor.y)))
-        {
-            return;
-        }
-
-        // Off to the top.
-        if (position.y > (sgflWindowHeight + (flHeight * ptAnchor.y)))
-        {
-            return;
-        }
-
-        // Old version assumed anchor of (0.5f, 0.0f).
-//        if (position.x < -flWidth / 2 || position.x > sgflWindowWidth + flWidth / 2)
-//        {
-//            return;
-//        }
-//        if (position.y < -flHeight || position.y > sgflWindowHeight)
-//        {
-//            return;
-//        }
+        // Include all ancestor transforms: local scale alone can discard a
+        // still-visible sprite when its world/camera parent is enlarged.
+        CGRect bounds=CGRectApplyAffineTransform((CGRect){CGPointZero,self.contentSize},self.nodeToWorldTransform);
+        // Keep a small screen-point guard band for edge rasterization.
+        CGRect viewport=CGRectMake(-2,-2,sgflWindowWidth+4,sgflWindowHeight+4);
+        if (!CGRectIntersectsRect(bounds,viewport)) return;
     }
     [super visit:context];
 }
