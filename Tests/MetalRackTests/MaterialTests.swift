@@ -3,6 +3,19 @@ import MetalKit
 @testable import MetalRack
 
 final class MaterialTests: XCTestCase {
+    func testEqualLengthShaderSourcesRemainDistinct() throws {
+        let renderer = try QuadRenderer(device: XCTUnwrap(MTLCreateSystemDefaultDevice()))
+        let red = "fragment float4 paint(VertexOut o [[stage_in]]) { return float4(1,0,0,1); }"
+        let blue = "fragment float4 paint(VertexOut o [[stage_in]]) { return float4(0,0,1,1); }"
+        XCTAssertEqual(red.utf8.count, blue.utf8.count)
+        let a = try renderer.pipeline(source: .one, destination: .zero, pixelFormat: .rgba8Unorm,
+                                      fragmentSource: red, fragmentFunction: "paint")
+        let b = try renderer.pipeline(source: .one, destination: .zero, pixelFormat: .rgba8Unorm,
+                                      fragmentSource: blue, fragmentFunction: "paint")
+        XCTAssertFalse(a === b)
+        XCTAssertTrue(a === (try renderer.pipeline(source: .one, destination: .zero, pixelFormat: .rgba8Unorm,
+                                                  fragmentSource: red, fragmentFunction: "paint")))
+    }
     func testCustomFragmentBlendAndOffscreenFormatUseSharedUploader() throws {
         let device = try XCTUnwrap(MTLCreateSystemDefaultDevice())
         let queue = try XCTUnwrap(device.makeCommandQueue())

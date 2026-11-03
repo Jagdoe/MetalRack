@@ -23,6 +23,13 @@ public final class QuadRenderer {
         let format: MTLPixelFormat
         let fragmentSource: String?
         let fragmentFunction: String
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(source); hasher.combine(destination); hasher.combine(format)
+            // Avoid rehashing full shader text for every batch. Synthesized
+            // equality still compares the complete source, including collisions.
+            hasher.combine(fragmentSource?.utf8.count)
+            hasher.combine(fragmentFunction)
+        }
     }
     private var pipelines: [PipelineKey: MTLRenderPipelineState] = [:]
     private var customLibraries: [String: MTLLibrary] = [:]
