@@ -34,6 +34,46 @@ final class NativeSceneTests: XCTestCase {
         root.removeAllChildren(withCleanup: true)
         XCTAssertTrue(root.children.isEmpty)
     }
+    func testTransformCachesFollowGeometryAncestorsReparentingAndParentLifetime() {
+        func local(_ node: MRNode) -> CGAffineTransform {
+            let ax = node.anchorPoint.x * node.contentSize.width, ay = node.anchorPoint.y * node.contentSize.height
+            let r = -node.rotation * .pi / 180
+            var x = node.position.x, y = node.position.y
+            if node.ignoresAnchorPointForPosition { x += ax; y += ay }
+            var t = CGAffineTransform(a: cos(r)*node.scaleX,b: sin(r)*node.scaleX,
+                                      c: -sin(r)*node.scaleY,d: cos(r)*node.scaleY,tx: x,ty: y)
+            if node.skewX != 0 || node.skewY != 0 {
+                t = CGAffineTransform(a: 1,b: tan(node.skewY * .pi/180),c: tan(node.skewX * .pi/180),d: 1,tx: 0,ty: 0).concatenating(t)
+            }
+            return t.translatedBy(x: -ax,y: -ay)
+        }
+        func check(_ node: MRNode) {
+            var expected = local(node), parent = node.parent
+            while let current = parent { expected = expected.concatenating(local(current)); parent = current.parent }
+            for _ in 0..<2 {
+                let actual = node.nodeToWorldTransform
+                for (a,b) in zip([actual.a,actual.b,actual.c,actual.d,actual.tx,actual.ty],
+                                 [expected.a,expected.b,expected.c,expected.d,expected.tx,expected.ty]) {
+                    XCTAssertEqual(a,b,accuracy: 0.000000001)
+                }
+            }
+        }
+        let root = MRNode(), parent = MRNode(), leaf = MRNode()
+        root.addChild(parent); parent.addChild(leaf); check(leaf)
+        let changes: [() -> Void] = [
+            { leaf.position = CGPoint(x: 4,y: 7) }, { root.position = CGPoint(x: 20,y: -12) },
+            { parent.rotation = 24 }, { leaf.anchorPoint = CGPoint(x: 0.2,y: 0.7) },
+            { leaf.contentSize = CGSize(width: 20,height: 13) }, { root.scaleX = 2 },
+            { parent.scaleY = 0.7 }, { parent.skewX = 7 }, { root.skewY = -9 },
+            { leaf.ignoresAnchorPointForPosition = true }, { root.scale = 3 }
+        ]
+        for change in changes { change(); check(leaf) }
+        parent.removeFromParent(); check(leaf)
+        let other = MRNode(); other.position = CGPoint(x: -30,y: 80); other.addChild(parent); check(leaf)
+        var temporary: MRNode? = MRNode(); let retainedChild = MRNode()
+        temporary!.position = CGPoint(x: 10,y: 20); temporary!.addChild(retainedChild); check(retainedChild)
+        temporary = nil; XCTAssertNil(retainedChild.parent); check(retainedChild)
+    }
     func testHierarchyTransformsAndStableDrawOrder() throws {
         let renderer = try SceneRenderer(device: XCTUnwrap(MTLCreateSystemDefaultDevice()))
         let context = MRRenderContext()

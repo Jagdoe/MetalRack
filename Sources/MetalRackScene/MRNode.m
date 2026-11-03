@@ -10,6 +10,8 @@
     __weak MRNode *_parent;
     BOOL _leavingEnvironment;
     NSArray<MRNode *> *_childSnapshot, *_orderedChildren;
+    CGAffineTransform _cachedLocalTransform, _cachedWorldTransform;
+    BOOL _localTransformValid, _worldTransformValid;
 }
 @end
 @implementation MRNode
@@ -20,7 +22,7 @@
 + (instancetype)node { return [[self alloc] init]; }
 - (void)dealloc {
     [self unscheduleAllSelectors];
-    for (MRNode *child in _children) child->_parent=nil;
+    for (MRNode *child in _children) { child->_parent=nil; [child invalidateWorldTransform]; }
     [self stopAllActions];
 
 }
@@ -53,7 +55,24 @@
     for (MRNode *child in [_children copy]) if (child.parent==self) [child cleanup];
 }
 - (CGFloat)scale { NSAssert(_scaleX==_scaleY,@"Node has independent axis scales"); return _scaleX; }
-- (void)setScale:(CGFloat)scale { _scaleX=scale; _scaleY=scale; }
+- (void)invalidateWorldTransform {
+    if (!_worldTransformValid) return;
+    _worldTransformValid=NO;
+    for (MRNode *child in _children) [child invalidateWorldTransform];
+}
+- (void)invalidateLocalTransform {
+    _localTransformValid=NO; [self invalidateWorldTransform];
+}
+- (void)setPosition:(CGPoint)value { if (CGPointEqualToPoint(_position,value)) return; _position=value; [self invalidateLocalTransform]; }
+- (void)setAnchorPoint:(CGPoint)value { if (CGPointEqualToPoint(_anchorPoint,value)) return; _anchorPoint=value; [self invalidateLocalTransform]; }
+- (void)setContentSize:(CGSize)value { if (CGSizeEqualToSize(_contentSize,value)) return; _contentSize=value; [self invalidateLocalTransform]; }
+- (void)setRotation:(CGFloat)value { if (_rotation==value) return; _rotation=value; [self invalidateLocalTransform]; }
+- (void)setScaleX:(CGFloat)value { if (_scaleX==value) return; _scaleX=value; [self invalidateLocalTransform]; }
+- (void)setScaleY:(CGFloat)value { if (_scaleY==value) return; _scaleY=value; [self invalidateLocalTransform]; }
+- (void)setSkewX:(CGFloat)value { if (_skewX==value) return; _skewX=value; [self invalidateLocalTransform]; }
+- (void)setSkewY:(CGFloat)value { if (_skewY==value) return; _skewY=value; [self invalidateLocalTransform]; }
+- (void)setIgnoresAnchorPointForPosition:(BOOL)value { if (_ignoresAnchorPointForPosition==value) return; _ignoresAnchorPointForPosition=value; [self invalidateLocalTransform]; }
+- (void)setScale:(CGFloat)scale { if (_scaleX==scale && _scaleY==scale) return; _scaleX=scale; _scaleY=scale; [self invalidateLocalTransform]; }
 - (CGRect)boundingBox { return CGRectApplyAffineTransform((CGRect){CGPointZero,_contentSize},self.nodeToParentTransform); }
 - (MRNode *)getChildByTag:(NSInteger)tag { for (MRNode *child in _children) if (child.tag==tag) return child; return nil; }
 - (void)reorderChild:(MRNode *)child z:(NSInteger)z { NSParameterAssert(child.parent==self); child.zOrder=z; }
@@ -74,18 +93,19 @@
     for (MRNode *ancestor=self; ancestor; ancestor=ancestor.parent)
         NSAssert(ancestor!=child,@"A scene tree cannot contain cycles");
     child.zOrder=z; child.tag=tag; [_children addObject:child]; child->_parent=self;
+    [child invalidateWorldTransform];
     _childSnapshot=nil; _orderedChildren=nil;
     if (self.inScene) [child attachToEnvironment:_environment];
 }
 // Internal scene-root adoption keeps lifecycle/callback state continuous.
 - (void)mrRemoveChildPreservingAttachment:(MRNode *)child {
-    if(child->_parent!=self)return;child->_parent=nil;[_children removeObjectIdenticalTo:child];
+    if(child->_parent!=self)return;child->_parent=nil;[child invalidateWorldTransform];[_children removeObjectIdenticalTo:child];
     _childSnapshot=nil; _orderedChildren=nil;
 }
 - (void)removeChild:(MRNode *)child {
     if (child->_parent!=self) return;
     [child detachFromEnvironment];
-    child->_parent=nil; [_children removeObjectIdenticalTo:child];
+    child->_parent=nil; [child invalidateWorldTransform]; [_children removeObjectIdenticalTo:child];
     _childSnapshot=nil; _orderedChildren=nil;
 }
 - (void)removeChild:(MRNode *)child cleanup:(BOOL)cleanup {
@@ -110,6 +130,7 @@
     return bounds;
 }
 - (CGAffineTransform)nodeToParentTransform {
+    if (_localTransformValid) return _cachedLocalTransform;
     CGFloat ax=_anchorPoint.x*_contentSize.width, ay=_anchorPoint.y*_contentSize.height;
     CGFloat x=_position.x, y=_position.y;
     if (_ignoresAnchorPointForPosition) { x+=ax; y+=ay; }
@@ -119,12 +140,15 @@
         CGAffineTransform skew=CGAffineTransformMake(1,tan(_skewY*M_PI/180),tan(_skewX*M_PI/180),1,0,0);
         t=CGAffineTransformConcat(skew,t);
     }
-    return CGAffineTransformTranslate(t,-ax,-ay);
+    _cachedLocalTransform=CGAffineTransformTranslate(t,-ax,-ay); _localTransformValid=YES;
+    return _cachedLocalTransform;
 }
 - (CGAffineTransform)nodeToWorldTransform {
+    if (_worldTransformValid) return _cachedWorldTransform;
     CGAffineTransform t=self.nodeToParentTransform;
-    for (MRNode *ancestor=_parent; ancestor; ancestor=ancestor.parent)
-        t=CGAffineTransformConcat(t,ancestor.nodeToParentTransform);
+    MRNode *parent=_parent;
+    if (parent) t=CGAffineTransformConcat(t,parent.nodeToWorldTransform);
+    _cachedWorldTransform=t; _worldTransformValid=YES;
     return t;
 }
 - (CGAffineTransform)worldToNodeTransform {return CGAffineTransformInvert(self.nodeToWorldTransform);}
