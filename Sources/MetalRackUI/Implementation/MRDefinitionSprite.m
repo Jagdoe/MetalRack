@@ -1666,9 +1666,10 @@ static float sgflWindowHeight = 480.0f;
     [self updateWorldPositionCache];
     if (m_fUseCulling == YES)
     {
-        // Include all ancestor transforms: local scale alone can discard a
-        // still-visible sprite when its world/camera parent is enlarged.
-        CGRect bounds=CGRectApplyAffineTransform((CGRect){CGPointZero,self.contentSize},self.nodeToWorldTransform);
+        // Returning here skips the whole subtree, not just this sprite.
+        // Include actual painted child geometry (such as sails outside a tower),
+        // retaining atlas trim offsets and every ancestor camera transform.
+        CGRect bounds=CGRectApplyAffineTransform(self.paintedBounds,self.nodeToWorldTransform);
         // Keep a small screen-point guard band for edge rasterization.
         CGRect viewport=CGRectMake(-2,-2,sgflWindowWidth+4,sgflWindowHeight+4);
         if (!CGRectIntersectsRect(bounds,viewport)) return;
