@@ -49,8 +49,11 @@ open class SceneRenderer: NSObject, MTKViewDelegate {
         let sAddress: MTLSamplerAddressMode
         let tAddress: MTLSamplerAddressMode
         let mipFilter: MTLSamplerMipFilter
+
     }
     private var samplers: [SamplerKey: MTLSamplerState] = [:]
+    // Native sampling has four binary fields and an effective mipmapping bit.
+    private var nativeSamplers: [MTLSamplerState?] = Array(repeating: nil, count: 32)
     private var reportedDrawable = false
     private var nativeContext: MRRenderContext?
     private var nativeTargets: [(UInt32, CGSize)] = []
@@ -111,21 +114,64 @@ open class SceneRenderer: NSObject, MTKViewDelegate {
                             blend: MRBlendFunction, sampling: MRTextureSampling, clip: CGRect, logicalSize size: CGSize) {
         precondition(size.width > 0 && size.height > 0)
         guard let image = texture == 0 ? white : textures[texture] else { preconditionFailure("Missing native texture") }
-        let points = vertices.map { vertex in
-            QuadRenderer.Vertex(position: SIMD2(vertex.x, Float(size.height)-vertex.y),
-                texCoord: SIMD2(vertex.u, vertex.v), color: SIMD4(vertex.r, vertex.g, vertex.b, vertex.a))
-        }
         let rectangle = CGRect(x: clip.minX/size.width, y: 1-clip.maxY/size.height,
                                width: clip.width/size.width, height: clip.height/size.height)
         let appearance = nativeMaterial(texture: texture, vertices: vertices, blend: blend)
+        let source = MTLBlendFactor(rawValue: UInt(blend.src.rawValue))!
+        let destination = MTLBlendFactor(rawValue: UInt(blend.dst.rawValue))!
+        let nearestMin = sampling.minFilter == MRFilterNearest
+        let nearestMag = sampling.magFilter == MRFilterNearest
+        let repeatS = sampling.sAddress == MRAddressRepeat
+        let repeatT = sampling.tAddress == MRAddressRepeat
+        let mipmapped = image.mipmapLevelCount > 1 && !nearestMin
+        let samplingKey = (nearestMin ? 0 : 1) | (nearestMag ? 0 : 2) |
+                          (repeatS ? 4 : 0) | (repeatT ? 8 : 0) | (mipmapped ? 16 : 0)
+        let samplingState: MTLSamplerState
+        if let cached = nativeSamplers[samplingKey] { samplingState = cached }
+        else {
+            samplingState = sampler(minFilter: nearestMin ? .nearest : .linear,
+                                    magFilter: nearestMag ? .nearest : .linear,
+                                    sAddress: repeatS ? .repeat : .clampToEdge,
+                                    tAddress: repeatT ? .repeat : .clampToEdge,
+                                    mipFilter: mipmapped ? .linear : .notMipmapped)
+            nativeSamplers[samplingKey] = samplingState
+        }
+        // Append into the last compatible batch before creating any temporary
+        // vertex array or Batch value. Painter order and every state boundary
+        // remain the same as enqueue(_:).
+        if coalescesAdjacentBatches, vertices.count.isMultiple(of: 3), !batches.isEmpty {
+            let joined = batches.withUnsafeMutableBufferPointer { buffer -> Bool in
+                let last = buffer.baseAddress!.advanced(by: buffer.count - 1)
+                guard last.pointee.vertices.count.isMultiple(of: 3),
+                      last.pointee.material == appearance.material, last.pointee.attributes == appearance.attributes,
+                      last.pointee.texture === image, last.pointee.sampler === samplingState,
+                      last.pointee.source == source, last.pointee.destination == destination,
+                      last.pointee.clip == rectangle, last.pointee.coordinateSize == size else { return false }
+                var index = 0
+                let base = vertices.baseAddress
+                while index < vertices.count {
+                    last.pointee.vertices.append(Self.nativeVertex(base![index], height: Float(size.height)))
+                    index += 1
+                }
+                return true
+            }
+            if joined { return }
+        }
+        let points = Array<QuadRenderer.Vertex>(unsafeUninitializedCapacity: vertices.count) { buffer, count in
+            var index = 0
+            let base = vertices.baseAddress
+            while index < vertices.count {
+                buffer.baseAddress!.advanced(by: index).initialize(to: Self.nativeVertex(base![index], height: Float(size.height)))
+                index += 1
+            }
+            count = vertices.count
+        }
         enqueue(Batch(material: appearance.material, attributes: appearance.attributes, vertices: points, texture: image,
-            source: MTLBlendFactor(rawValue: UInt(blend.src.rawValue))!,
-            destination: MTLBlendFactor(rawValue: UInt(blend.dst.rawValue))!, clip: rectangle,
-            sampler: sampler(minFilter: sampling.minFilter == MRFilterNearest ? .nearest : .linear,
-                             magFilter: sampling.magFilter == MRFilterNearest ? .nearest : .linear,
-                             sAddress: sampling.sAddress == MRAddressRepeat ? .repeat : .clampToEdge,
-                             tAddress: sampling.tAddress == MRAddressRepeat ? .repeat : .clampToEdge,
-                             mipFilter: image.mipmapLevelCount>1 && sampling.minFilter == MRFilterLinear ? .linear : .notMipmapped), coordinateSize: size))
+                      source: source, destination: destination, clip: rectangle, sampler: samplingState, coordinateSize: size))
+    }
+    private static func nativeVertex(_ vertex: MRRenderVertex, height: Float) -> QuadRenderer.Vertex {
+        QuadRenderer.Vertex(position: SIMD2(vertex.x, height-vertex.y),
+                            texCoord: SIMD2(vertex.u, vertex.v), color: SIMD4(vertex.r, vertex.g, vertex.b, vertex.a))
     }
     public init(device: MTLDevice) throws {
         self.device = device
