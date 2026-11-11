@@ -13,6 +13,23 @@
 #import <QuartzCore/QuartzCore.h>
 #import "2DMath.h"
 #import "MRAudio.h"
+#import "MRPlacementScene.h"
+
+// Buttons register independently of their container layers. Modal ownership,
+// rather than the immediate parent's input flag, determines their eligibility:
+// passive layout/dimmer layers may legitimately have input disabled.
+static BOOL MRButtonBelongsToActiveModal(MRNode *button)
+{
+    for(MRNode *node=button.parent;node;node=node.parent) {
+        if(![node isKindOfClass:MRPlacementScene.class])continue;
+        MRLayer *modal=[(MRPlacementScene *)node getActiveChildModalLayer];
+        if(!modal)return YES;
+        for(MRNode *ancestor=button;ancestor && ancestor!=node;ancestor=ancestor.parent)
+            if(ancestor==modal)return YES;
+        return NO;
+    }
+    return YES;
+}
 
 @implementation MRButton
 
@@ -316,7 +333,7 @@ static NSDate   *sgdateRanButtonFunction = nil;
 
 - (BOOL)pointerBegan:(MRPointerEvent *)touch
 {
-	if (enabled == NO)
+	if (enabled == NO || !MRButtonBelongsToActiveModal(self))
 		return NO;
 
     // If our parent is running an action (like zooming up, or scaling, etc), don't count this.
@@ -358,6 +375,7 @@ static NSDate   *sgdateRanButtonFunction = nil;
 
 - (void)pointerMoved:(MRPointerEvent *)touch
 {
+    if (!MRButtonBelongsToActiveModal(self)) { [self pointerCancelled:touch]; return; }
     if (enabled == NO || m_fDeselectOnDrag == NO)
     {
         return;
@@ -395,6 +413,7 @@ static NSDate   *sgdateRanButtonFunction = nil;
 
 -(void) pointerEnded:(MRPointerEvent *)touch
 {
+    if (!MRButtonBelongsToActiveModal(self)) { [self pointerCancelled:touch]; return; }
 	if (enabled == NO)
 		return; //NO
 
