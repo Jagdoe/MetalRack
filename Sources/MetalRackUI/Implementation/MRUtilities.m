@@ -150,7 +150,8 @@ static int snNumKeyStyles = sizeof(sstrKeyStyles) / sizeof(NSString*);
 		// Keep a copy of the font to use.
 		m_strDefaultFont = ([NSString stringWithString:[self getDefaultFont]]);
 
-		[self initNetwork];
+        m_fUseCloud = dictOptions[OPTIONS_USE_CLOUD] ? [dictOptions[OPTIONS_USE_CLOUD] boolValue] : YES;
+        if (m_fUseCloud) [self initNetwork];
 		NSLog(@"  UM: Done with initNetwork.");
 
 		// Game Center.
@@ -1715,6 +1716,7 @@ static int snDotCount = 0;
 
 - (void)localSendISCRequest:(NSString*)strRequest withRetain:(BOOL)fRetain
 {
+    if (!m_fUseCloud) return;
 	BOOL fCouldReachHost = [self isNetworkAvailable];
 	if (fCouldReachHost == NO)
 	{
@@ -1904,6 +1906,7 @@ static int snDotCount = 0;
 
 - (void)sendISCPingWithExtra:(NSString*)strExtra
 {
+    if (!m_fUseCloud) return;
 	// Ping needs to regenerate parameters for score.
 	(void)0;
 	m_dictISCParams = nil;
@@ -1940,6 +1943,7 @@ static int snDotCount = 0;
 
 - (void)sendISCData:(NSData*)postData forFriend:(NSString*)strFriend forKey:(NSString*)strKey withDelegate:(id)idTarget forceSynchronous:(BOOL)fSynch
 {
+    if (!m_fUseCloud) return;
 //    NSUInteger nLength = [postData length];
 //    NSLog(@"Data size = %d, Outgoing data = %@", nLength, postData);
 
@@ -1972,6 +1976,7 @@ static int snDotCount = 0;
 
 - (void)sendISCGetFBFriendFrequest:(NSString*)strFriends withDelegate:(id)idTarget
 {
+    if (!m_fUseCloud) return;
     // Construct our URL.
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@", ISC_MAIN_URL, ISC_FBFRIENDS_SNIP]];
     NSDictionary *params=[self genericParameters];

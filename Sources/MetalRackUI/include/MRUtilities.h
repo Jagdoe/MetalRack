@@ -146,6 +146,7 @@ typedef struct
     NSMutableDictionary *m_dictOFtoGC;
 
 	// Facebook stuff.
+    BOOL                m_fUseCloud;
     BOOL                m_fUseFacebook;
     BOOL                m_fRequireFacebook;
     id                  m_idFacebookCallbackOb;
@@ -386,6 +387,7 @@ typedef struct
 
 #define OPTIONS_USE_GAME_CENTER		@"use game center"
 #define OPTIONS_USE_IN_APP			@"use in-app"
+#define OPTIONS_USE_CLOUD           @"use cloud" // Defaults to YES for existing clients.
 #define OPTIONS_USE_FACEBOOK        @"use facebook"
 #define OPTIONS_REQUIRE_FACEBOOK    @"require facebook"
 #define OPTIONS_CALLBACK_FACEBOOK   @"callback facebook"

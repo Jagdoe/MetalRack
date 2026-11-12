@@ -10,6 +10,10 @@
 //
 
 #import "MRSocialService.h"
+#import "Facebook.h"
+
+@interface MRSocialService () <FBRequestDelegate, FBSessionDelegate>
+@end
 
 @implementation MRSocialService
 
@@ -35,7 +39,10 @@ static MRSocialService *sgFBManager = nil;
 	self = [super init];
 	if (self != nil)
 	{
-		m_facebook = [[Facebook alloc] initWithAppId:strAppId andDelegate:self];
+		// The Facebook SDK is supplied only by clients that opt into social login.
+        // Offline clients can link MetalRackUI without that vendor implementation.
+        Class provider = NSClassFromString(@"Facebook");
+        m_facebook = [[provider alloc] initWithAppId:strAppId andDelegate:self];
 		m_idDelegate = nil;
 		m_dictRequestType = [[NSMutableDictionary alloc] initWithCapacity:1];
 		m_dictResultsCache = [[NSMutableDictionary alloc] initWithCapacity:1];

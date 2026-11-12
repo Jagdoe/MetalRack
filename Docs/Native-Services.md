@@ -46,3 +46,16 @@ StoreKit, WebKit and sound checks described in
 Debug/Release builds with packaged-sprite validation. External Facebook accounts
 and the old service's server-side behavior require their own live configuration;
 local tests exercise platform callbacks and the retained wire protocol.
+
+## Clients without cloud or social services
+
+`OPTIONS_USE_CLOUD` defaults to YES, preserving existing clients. A client may
+explicitly pass NO to skip cloud initialization and its delayed startup ping.
+The cloud request entry points also return before creating or queuing requests
+when disabled. Local preferences, StoreKit, reachability, audio and rendering
+remain independent. Facebook options retain their existing defaults.
+
+The Facebook implementation is an optional client-supplied provider, resolved
+by class name when social login is enabled. Applications that still opt in and
+link their SDK retain their existing provider/callback path; applications without
+social login no longer need to compile/link the Facebook SDK to use MetalRackUI.

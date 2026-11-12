@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "Facebook.h"
+@class Facebook;
 
 #define PATH_ID         @"me"
 #define PATH_FRIENDS    @"me/friends"
@@ -18,7 +18,7 @@
 
 @end
 
-@interface MRSocialService : NSObject <FBRequestDelegate, FBSessionDelegate>
+@interface MRSocialService : NSObject
 {
 	Facebook				*m_facebook;
 	NSString				*m_strPendingGraphPath;
