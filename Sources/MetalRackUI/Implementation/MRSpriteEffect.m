@@ -88,9 +88,9 @@ static NSMutableDictionary  *sgdictFreeEffects;
 
     NSMutableArray *aFreeEffects = [sgdictFreeEffects objectForKey:dictEffect];
 
-	int nFree = [aFreeEffects count];
+	NSUInteger nFree = [aFreeEffects count];
     int nCacheSize = [[dictEffect objectForKey:@"cache size"] intValue];
-	int nActive = nCacheSize - nFree;
+	int nActive = nCacheSize - (int)nFree;
 	return nActive;
 }
 

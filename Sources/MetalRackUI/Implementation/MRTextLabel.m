@@ -95,7 +95,7 @@
 
         // Initialization code
 		int nLetterIndex = 0;
-		int nCount = [strWord length];
+		NSUInteger nCount = [strWord length];
 		float flXPos = 0;
 
 

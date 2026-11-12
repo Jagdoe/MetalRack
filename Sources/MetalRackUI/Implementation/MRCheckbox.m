@@ -1,6 +1,7 @@
 #include <TargetConditionals.h>
 #if TARGET_OS_IOS
 #import <UIKit/UIKit.h>
+#import "MRSelector.h"
 //
 //  C2DCheckbox.m
 //  Befuddled2
@@ -49,7 +50,7 @@
         m_fChecked = NO;
         [self setFrame:m_frameUnchecked];
     }
-    [m_idTouchCheckbox performSelector:m_selTouchCheckbox withObject:self];
+    MRInvokeCallback(m_idTouchCheckbox, m_selTouchCheckbox, 1, self, nil);
 }
 
 - (void)setCheckboxState:(BOOL)fChecked

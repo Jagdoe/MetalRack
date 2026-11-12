@@ -77,7 +77,7 @@ static MRSocialService *sgFBManager = nil;
     {
         //get the logged-in user's friends
         FBRequest *lastRequest = [m_facebook requestWithGraphPath:strGraphPath andDelegate:self];
-		NSString *strRequest = [NSString stringWithFormat:@"%d", (int)lastRequest];
+		NSString *strRequest = [NSString stringWithFormat:@"%p", (__bridge void *)lastRequest];
 		[m_dictRequestType setObject:strGraphPath forKey:strRequest];
         NSLog(@"Adding Facebook graph path request: %@", strRequest);
     }
@@ -109,7 +109,7 @@ static MRSocialService *sgFBManager = nil;
     NSString *strName = nil;
     // Split the name up, and shorten the second and on if they're too long.
     NSArray *arrNames = [strLongName componentsSeparatedByString:@" "];
-    int nCount = [arrNames count];
+    NSUInteger nCount = [arrNames count];
     if (nCount >= 2)
     {
         strName = [NSString stringWithFormat:@"%@ ", [arrNames objectAtIndex:0]];
@@ -251,7 +251,7 @@ static MRSocialService *sgFBManager = nil;
 
 - (void)request:(FBRequest *)request didLoad:(id)result;
 {
-	NSString *strRequest = [NSString stringWithFormat:@"%d", (int)request];
+	NSString *strRequest = [NSString stringWithFormat:@"%p", (__bridge void *)request];
 	NSString *strGraphPath = [m_dictRequestType objectForKey:strRequest];
     if ([result isKindOfClass:[NSData class]] == YES)
     {

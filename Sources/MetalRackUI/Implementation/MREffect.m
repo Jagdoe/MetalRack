@@ -82,9 +82,9 @@ static int					snCacheSize[NUM_EFFECT_TYPES] = { 0, EFFECT_MAX_EXPLOSION };
 	if ((int)eType < 0 || eType >= NUM_EFFECT_TYPES)
 		return 0;
 
-	int nFree = [aFreeEffects[eType] count];
+	NSUInteger nFree = [aFreeEffects[eType] count];
 	int nMax = snCacheSize[eType];
-	int nActive = nMax - nFree;
+	int nActive = nMax - (int)nFree;
 	return nActive;
 }
 

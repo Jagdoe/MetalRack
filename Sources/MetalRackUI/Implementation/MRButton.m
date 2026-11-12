@@ -1,6 +1,7 @@
 #include <TargetConditionals.h>
 #if TARGET_OS_IOS
 #import <UIKit/UIKit.h>
+#import "MRSelector.h"
 //
 //  C2DButton.m
 //  Befuddled
@@ -124,7 +125,7 @@ static NSDate   *sgdateRanButtonFunction = nil;
 
 - (id)initWithFrameName:(NSString *)strFrame
 {
-	int nEnd = [strFrame length] - 4;
+	NSUInteger nEnd = [strFrame length] - 4;
 	NSString *strTrimmed = [strFrame substringToIndex:nEnd];
 	NSString *strHighlightFrame = [NSString stringWithFormat:@"%@_h.png", strTrimmed];
 	m_frameNormal		= [[MRSceneRuntime sharedRuntime].resources frameNamed:strFrame];
@@ -356,7 +357,7 @@ static NSDate   *sgdateRanButtonFunction = nil;
 				{
                     if ([m_idTouchBegin respondsToSelector:m_selTouchBegin] == YES)
                     {
-                        [m_idTouchBegin performSelector:m_selTouchBegin withObject:self];
+                        MRInvokeCallback(m_idTouchBegin, m_selTouchBegin, 1, self, nil);
                         [MRButton setRunFunctionToNow];
                     }
 				}
@@ -418,7 +419,7 @@ static NSDate   *sgdateRanButtonFunction = nil;
 		return; //NO
 
     // If our parent is running an action (like zooming up, or scaling, etc), don't count this.
-    int nActions = [self.parent numberOfRunningActions];
+    NSUInteger nActions = [self.parent numberOfRunningActions];
     if (nActions > 0)
         return;
 
@@ -461,7 +462,7 @@ static NSDate   *sgdateRanButtonFunction = nil;
                     if ([m_idTouchBegin respondsToSelector:m_selTouchBegin] == YES)
                     {
                         [m_idTouchBegin performSelector:m_selTouchBegin withObject:self afterDelay:0.0f];
-//                        [m_idTouchBegin performSelector:m_selTouchBegin withObject:self];
+//                        MRInvokeCallback(m_idTouchBegin, m_selTouchBegin, 1, self, nil);
                         [MRButton setRunFunctionToNow];
                     }
 				}

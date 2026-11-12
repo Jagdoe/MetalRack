@@ -19,9 +19,7 @@
 
 +(MRPointValue*) CGPointObWithPoint:(CGPoint)ptPoint
 {
-    MRPointValue *obNew = [MRPointValue alloc];
-    [obNew initWithPoint:ptPoint];
-    (obNew);
+    MRPointValue *obNew = [[MRPointValue alloc] initWithPoint:ptPoint];
     return obNew;
 }
 

@@ -211,7 +211,7 @@
 			flDistance = 1.0f;
 
 		// Down-right
-		MRSystemText *labelShadow = [MRSystemText labelWithString:strText dimensions:dimensions alignment:UITextAlignmentCenter fontName:strFont fontSize:flFontSize];
+		MRSystemText *labelShadow = [MRSystemText labelWithString:strText dimensions:dimensions alignment:NSTextAlignmentCenter fontName:strFont fontSize:flFontSize];
 		[labelShadow setAnchorPoint:MRPoint(0.5, 1.0f)];
 		[labelShadow setPosition:MRPoint(Position.x + flDistance, Position.y - flDistance)];
 		[labelShadow setColor:MRRGB(0, 0, 0)];
@@ -221,7 +221,7 @@
 		if (eStyle == ELT_OUTLINE)
 		{
 			// Up-Left
-			labelShadow = [MRSystemText labelWithString:strText dimensions:dimensions alignment:UITextAlignmentCenter fontName:strFont fontSize:flFontSize];
+			labelShadow = [MRSystemText labelWithString:strText dimensions:dimensions alignment:NSTextAlignmentCenter fontName:strFont fontSize:flFontSize];
 			[labelShadow setAnchorPoint:MRPoint(0.5, 1.0f)];
 			[labelShadow setPosition:MRPoint(Position.x - flDistance, Position.y + flDistance)];
 			[labelShadow setColor:MRRGB(0, 0, 0)];
@@ -229,7 +229,7 @@
 			[pBundle->arrSummary addObject:labelShadow];
 
 			// Down-Left
-			labelShadow = [MRSystemText labelWithString:strText dimensions:dimensions alignment:UITextAlignmentCenter fontName:strFont fontSize:flFontSize];
+			labelShadow = [MRSystemText labelWithString:strText dimensions:dimensions alignment:NSTextAlignmentCenter fontName:strFont fontSize:flFontSize];
 			[labelShadow setAnchorPoint:MRPoint(0.5, 1.0f)];
 			[labelShadow setPosition:MRPoint(Position.x - flDistance, Position.y - flDistance)];
 			[labelShadow setColor:MRRGB(0, 0, 0)];
@@ -237,7 +237,7 @@
 			[pBundle->arrSummary addObject:labelShadow];
 
 			// Up-Right
-			labelShadow = [MRSystemText labelWithString:strText dimensions:dimensions alignment:UITextAlignmentCenter fontName:strFont fontSize:flFontSize];
+			labelShadow = [MRSystemText labelWithString:strText dimensions:dimensions alignment:NSTextAlignmentCenter fontName:strFont fontSize:flFontSize];
 			[labelShadow setAnchorPoint:MRPoint(0.5, 1.0f)];
 			[labelShadow setPosition:MRPoint(Position.x + flDistance, Position.y + flDistance)];
 			[labelShadow setColor:MRRGB(0, 0, 0)];
@@ -246,7 +246,7 @@
 		}
 	}
 
-	MRSystemText *labelText = [MRSystemText labelWithString:strText dimensions:dimensions alignment:UITextAlignmentCenter fontName:strFont fontSize:flFontSize];
+	MRSystemText *labelText = [MRSystemText labelWithString:strText dimensions:dimensions alignment:NSTextAlignmentCenter fontName:strFont fontSize:flFontSize];
 	[labelText setAnchorPoint:MRPoint(0.5, 1.0f)];
 	[labelText setPosition:Position];
 	[labelText setColor:pBundle->colorText];
@@ -332,10 +332,10 @@
 
 	// Get the actual size we'll need.
 	UIFont *font = [UIFont fontWithName:strFont size:nFontSize];
-	size = [strText sizeWithFont:font constrainedToSize:size lineBreakMode:UILineBreakModeWordWrap];
+	size = [strText boundingRectWithSize:size options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:font} context:nil].size;
 
 	// Make the text...
-	MRSystemText *labelText = [MRSystemText labelWithString:strText dimensions:size alignment:UITextAlignmentLeft
+	MRSystemText *labelText = [MRSystemText labelWithString:strText dimensions:size alignment:NSTextAlignmentLeft
 										 fontName:strFont fontSize:nFontSize];
 	[node addChild:labelText z:MR_LAYER_FOREGROUND];
 	[m_tBundles[nBundle].arrAllVisuals addObject:labelText];
@@ -747,13 +747,13 @@
     UIFont *font = [UIFont fontWithName:strFont size:nFontSize];
     NSString *strDot = @" .";
     NSString *strRest = [NSString stringWithFormat:@"%@%@", strDot, strLast];
-    CGSize sizeText1 = [strFirst sizeWithFont:font];
-    CGSize sizeText2 = [strRest sizeWithFont:font];
+    CGSize sizeText1 = [strFirst sizeWithAttributes:@{NSFontAttributeName:font}];
+    CGSize sizeText2 = [strRest sizeWithAttributes:@{NSFontAttributeName:font}];
     while (sizeText1.width + sizeText2.width < flMaxWidth)
     {
         strDot = [NSString stringWithFormat:@"%@ .", strDot];
         strRest = [NSString stringWithFormat:@"%@%@", strDot, strLast];
-        sizeText2 = [strRest sizeWithFont:font];
+        sizeText2 = [strRest sizeWithAttributes:@{NSFontAttributeName:font}];
     }
 
     MRSystemText *labelText = [MRSystemText labelWithString:strFirst fontName:strFont fontSize:nFontSize];
@@ -969,7 +969,7 @@
 	[buttonTabbar setPosition:MRPoint(MR_HALF_SCREEN_MINOR, MR_SCREEN_MAJOR * 0.375f)]; // - 60
 	[buttonTabbar addTouchTarget:selector forObject:obTarget];
     [buttonTabbar setTextColor:MRRGB(255, 255, 255)];
-	[buttonTabbar setText:strButton];//    atPosition:ccp(0.0f, -5.0f * flScaleAdjust) withAlignment:UITextAlignmentCenter];
+	[buttonTabbar setText:strButton];//    atPosition:ccp(0.0f, -5.0f * flScaleAdjust) withAlignment:NSTextAlignmentCenter];
 	[m_layNotify addChild:buttonTabbar];
 
     // Let's show the OpenFeint GameFeed while paused.
@@ -1174,7 +1174,7 @@
 
 
     float flIPadFactor = 1.0f;
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+    if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad)
         flIPadFactor = 2.0f;
     float flScaleX = MR_SCREEN_MINOR / (flIPadFactor * 320.0f);
 //    float flScaleY = MR_SCREEN_MAJOR / (flIPadFactor * 480.0f);
@@ -1424,7 +1424,7 @@
     else
     {
         // Give our disabled Layers to whoever came after us.
-        int nIndex = [m_aModalDataStack indexOfObject:modalData];
+        NSUInteger nIndex = [m_aModalDataStack indexOfObject:modalData];
 
         ModalData *nextModalData = [m_aModalDataStack objectAtIndex:nIndex + 1];
         if (nextModalData != nil)
@@ -1461,13 +1461,13 @@
 
 - (void)delayedRemoveChildModalLayersCount:(int)nCount
 {
-    int nMaxStack = [m_aModalDataStack count];
+    NSUInteger nMaxStack = [m_aModalDataStack count];
 
     if (nMaxStack == 0)
         return;
     for (int i = 0; i < nCount; i++)
     {
-        int nIndex = nMaxStack - 1 - i;
+        NSUInteger nIndex = nMaxStack - 1 - i;
         if (nIndex > nMaxStack - 1)
             continue;
         ModalData *indexedModalData = [m_aModalDataStack objectAtIndex:nIndex];
@@ -1480,13 +1480,13 @@
 
 - (void)delayedRemoveAllChildModalLayers
 {
-    int nMaxStack = [m_aModalDataStack count];
+    NSUInteger nMaxStack = [m_aModalDataStack count];
 
     if (nMaxStack == 0)
         return;
     for (int i = 0; i < nMaxStack; i++)
     {
-        int nIndex = nMaxStack - 1 - i;
+        NSUInteger nIndex = nMaxStack - 1 - i;
         if (nIndex > nMaxStack - 1)
             continue;
         ModalData *indexedModalData = [m_aModalDataStack objectAtIndex:nIndex];
@@ -1595,9 +1595,9 @@
 //			[aList addObject:node];
 //	}
 
-	int nCount = [aChildren count];
-	int nIndex1 = random() % nCount;
-	int nIndex2 = random() % nCount;
+	NSUInteger nCount = [aChildren count];
+	NSUInteger nIndex1 = random() % nCount;
+	NSUInteger nIndex2 = random() % nCount;
 	if (nIndex2 == nIndex1)
 		nIndex2 = (nIndex2 + 1) % nCount;
 	MRNode *node1 = [aChildren objectAtIndex:nIndex1];

@@ -16,6 +16,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import <WebKit/WebKit.h>
 
 @protocol FBDialogDelegate;
 
@@ -25,12 +26,12 @@
  * Facebook dialog interface for start the facebook webView UIServer Dialog.
  */
 
-@interface FBDialog : UIView <UIWebViewDelegate> {
+@interface FBDialog : UIView <WKNavigationDelegate> {
   id<FBDialogDelegate> _delegate;
   NSMutableDictionary *_params;
   NSString * _serverURL;
   NSURL* _loadingURL;
-  UIWebView* _webView;
+  WKWebView* _webView;
   UIActivityIndicatorView* _spinner;
   UIButton* _closeButton;
   UIInterfaceOrientation _orientation;
@@ -62,6 +63,7 @@
  * The view will be added to the top of the current key window.
  */
 - (void)show;
+- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error;
 
 /**
  * Displays the first page of the dialog.

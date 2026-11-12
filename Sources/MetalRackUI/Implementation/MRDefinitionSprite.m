@@ -1,6 +1,7 @@
 #include <TargetConditionals.h>
 #if TARGET_OS_IOS
 #import <UIKit/UIKit.h>
+#import "MRSelector.h"
 //
 //  C2DSprite.m
 //  Zombie
@@ -82,7 +83,7 @@ static float sgflWindowHeight = 480.0f;
 	if ([obImage isKindOfClass:[NSArray class]] == YES)
 	{
 		NSArray *aImage = (NSArray *)obImage;
-		int numTypes = [aImage count];
+		NSUInteger numTypes = [aImage count];
 		int nRandIndex = nVariation % numTypes;
 		strImage = [aImage objectAtIndex:nRandIndex];
 	}
@@ -669,7 +670,7 @@ static float sgflWindowHeight = 480.0f;
 		{
             SEL selMotion = NSSelectorFromString(strMotion);
 			if ([self respondsToSelector:selMotion])
-				[self performSelector:selMotion];
+				MRInvokeCallback(self, selMotion, 0, nil, nil);
 		}
 	}
 }
@@ -1013,9 +1014,9 @@ static float sgflWindowHeight = 480.0f;
 
 - (void)intervalAnimateAttachments:(MRTime)deltaTime
 {
-	unsigned int nPlay = [@"play" hash];
-	unsigned int nRock = [@"rock" hash];
-	unsigned int nHop  = [@"hop" hash];
+	NSUInteger nPlay = [@"play" hash];
+	NSUInteger nRock = [@"rock" hash];
+	NSUInteger nHop  = [@"hop" hash];
 
 	for (MRDefinitionSprite *sprAttach in self.m_aAttachments)
 	{
@@ -1031,7 +1032,7 @@ static float sgflWindowHeight = 480.0f;
 
 		if (nFrequency > 0 && random() % nFrequency == 0)
 		{
-			unsigned int nIntAnimate = [[sprAttach.m_dictDef objectForKey:@"interval motion"] hash];
+			NSUInteger nIntAnimate = [[sprAttach.m_dictDef objectForKey:@"interval motion"] hash];
 			if (nIntAnimate == nPlay)
 				[sprAttach playAnimation];
 			else if (nIntAnimate == nRock)
@@ -1044,10 +1045,10 @@ static float sgflWindowHeight = 480.0f;
 
 - (void)intervalAnimateDecals:(MRTime)deltaTime
 {
-	unsigned int nPlay = [@"play" hash];
-	unsigned int nPlayForever = [@"play forever" hash];
-	unsigned int nRock = [@"rock" hash];
-	unsigned int nHop  = [@"hop" hash];
+	NSUInteger nPlay = [@"play" hash];
+	NSUInteger nPlayForever = [@"play forever" hash];
+	NSUInteger nRock = [@"rock" hash];
+	NSUInteger nHop  = [@"hop" hash];
 
     int nOngoingCount = 0;
 	for (MRDefinitionSprite *sprDecal in self.m_aDecals)
@@ -1070,7 +1071,7 @@ static float sgflWindowHeight = 480.0f;
 
 		if ((nFrequency > 0 && random() % nFrequency == 0))
 		{
-			unsigned int nIntAnimate = [[sprDecal.m_dictDef objectForKey:@"interval motion"] hash];
+			NSUInteger nIntAnimate = [[sprDecal.m_dictDef objectForKey:@"interval motion"] hash];
 			if (nIntAnimate == nPlay)
 				[sprDecal playAnimation];
 			else if (nIntAnimate == nRock)
@@ -1081,7 +1082,7 @@ static float sgflWindowHeight = 480.0f;
 		}
 		else
 		{
-			unsigned int nIntAnimate = [[sprDecal.m_dictDef objectForKey:@"interval motion"] hash];
+			NSUInteger nIntAnimate = [[sprDecal.m_dictDef objectForKey:@"interval motion"] hash];
 			if (nIntAnimate == nPlayForever)
 				[sprDecal playAnimationForever];
 		}
@@ -1332,10 +1333,10 @@ static float sgflWindowHeight = 480.0f;
 
 - (MRTextLabel*)setText:(NSString *)strText atPosition:(CGPoint)Position
 {
-	return [self setText:strText atPosition:Position withAlignment:UITextAlignmentLeft];
+	return [self setText:strText atPosition:Position withAlignment:NSTextAlignmentLeft];
 }
 
-- (MRTextLabel*)setText:(NSString *)strText atPosition:(CGPoint)Position withAlignment:(UITextAlignment)alignment
+- (MRTextLabel*)setText:(NSString *)strText atPosition:(CGPoint)Position withAlignment:(NSTextAlignment)alignment
 {
 	if (m_label)
 		[self removeChild:m_label cleanup:YES];

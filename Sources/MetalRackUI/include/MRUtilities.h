@@ -15,7 +15,7 @@
 #import "MRSocialService.h"
 #endif
 
-#import <StoreKit/StoreKit.h>
+#import "MRStoreService.h"
 
 #define LEADERBOARDS_MAX	(14)
 
@@ -91,9 +91,9 @@ typedef struct
 @end
 
 #ifdef PROJECT_USE_FBMANAGER
-@interface MRUtilities : NSObject <NSXMLParserDelegate, SKProductsRequestDelegate, SKPaymentTransactionObserver, FBManagerDelegate>
+@interface MRUtilities : NSObject <NSXMLParserDelegate, FBManagerDelegate>
 #else
-@interface MRUtilities : NSObject <NSXMLParserDelegate, SKProductsRequestDelegate, SKPaymentTransactionObserver>
+@interface MRUtilities : NSObject <NSXMLParserDelegate>
 #endif
 {
 	// General stuff.
@@ -111,7 +111,7 @@ typedef struct
     NSDictionary    *m_dictGroupsCombined;
 
 	// InertSoap Connection stuff
-	NSURLConnection		*m_connectionISC;
+	NSURLSessionDataTask	*m_connectionISC;
 	NSData				*m_dataISC;
 	NSString			*m_strCurrentXMLElement;
 	NSMutableDictionary *m_dictISCParams;
@@ -124,8 +124,8 @@ typedef struct
 	BOOL					m_fUseInApp;
 	id						m_idPaymentCallbackOb;
 	// In-App Purchase: Product add-on request information
-	SKProductsRequest		*m_prodRequest;
-	SKProductsResponse		*m_prodResponse;
+	BOOL					m_productRequestPending;
+	MRStoreResponse		*m_prodResponse;
 	id						m_callBackOb;
 	SEL						m_callBackSelector;
 
@@ -141,7 +141,7 @@ typedef struct
 //	GKLeaderboard		*m_leaderboardRequestForRank;
     NSMutableArray      *m_arrLeaderboardRequestsPending;
 	NSMutableArray		*m_arrLeaderboardRankRequests;
-	GKLeaderboard		*m_leaderboardRequestForDistance;
+	BOOL				m_distanceRequestPending;
 
     NSMutableDictionary *m_dictOFtoGC;
 
@@ -274,8 +274,6 @@ typedef struct
 - (void)initColors;
 + (MRColor3B)getColor:(NSString*)strColor;
 + (MRRenderColor)getColorAs4B:(NSString*)strColor;
-+ (MRColor3B)getColor:(NSString*)strColor;
-+ (MRRenderColor)getColorAs4B:(NSString*)strColor;
 + (NSArray *)getColorSet:(NSString *)strColorSet;
 + (MRColor3B)getColorInSet:(NSString *)strColorSet atIndex:(int)nIndex;
 
@@ -332,22 +330,15 @@ typedef struct
 #pragma mark In-App Purchase
 // In-App Purchase Stuff.
 - (void)initInApp;
-- (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transactions;
-- (void)failedTransaction: (SKPaymentTransaction *)transaction;
-- (void)restoreTransaction: (SKPaymentTransaction *)transaction;
-- (void)completeTransaction: (SKPaymentTransaction *)transaction;
 - (void)attemptPaymentWithProductIdentifier:(NSString *)strID callBackOb:(id)idCallback;
-- (void)notifyPurchaseofTransaction:(SKPaymentTransaction *)transaction;
 
 #pragma mark -
 #pragma mark Purchasing Response Delegate
 // Product releated queries and delegate
 - (void)createRequest:(NSMutableSet *)setPacks callBackOb:(id)idOb selector:(SEL)selCallBack;
 - (void)cancelRequest;
-- (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response;
-- (void)request:(SKRequest *)request didFailWithError:(NSError *)error;
-- (SKProductsResponse*)getStoreResponse;
-- (SKProduct *)getProductForID:(NSString*)strID;
+- (MRStoreResponse*)getStoreResponse;
+- (MRStoreProduct *)getProductForID:(NSString*)strID;
 
 // Rewards & eMail
 #pragma mark -
@@ -362,7 +353,6 @@ typedef struct
 - (BOOL) GCisAvailable;
 - (BOOL) GCisAuthenticated;
 - (void) GCauthenticateLocalPlayer;
-- (BOOL) GCisAuthenticated;
 - (void) GCreportScore:(Float64)flScore forCategory:(NSString*)strCategory;
 - (void) GCshowLeaderboard;
 - (void) GCshowLeaderboardWithBoard:(NSString*)strLeaderboard;
@@ -425,7 +415,7 @@ typedef struct
 #define ISC_LIBRARY_VERSION		(1.0)
 
 //#define MR_ISC_APP_NAME			// Define this in the project-specific area, please!
-#define ISC_MAIN_URL			@"http://inertsoap.com/"
+#define ISC_MAIN_URL			@"https://inertsoap.com/"
 #define ISC_COUPONREQ_SNIP		@"chatter/request_coupon.php"
 #define ISC_COUPONUSE_SNIP		@"chatter/use_coupon.php"
 #define ISC_COUPONREDEEM_SNIP	@"chatter/redeem_coupons.php"
@@ -468,15 +458,6 @@ typedef struct
 
 #pragma mark -
 #pragma mark AlertViewURL
-
-@interface UIAlertViewURL : UIAlertView
-{
-	NSString	*m_strURL;
-}
-
-@property (copy) NSString *strURL;
-
-@end	// AlertViewURL
 
 // Various defs.
 #define PREFS_KEY_KILLS		@"destroy"

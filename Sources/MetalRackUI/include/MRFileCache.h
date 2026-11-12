@@ -34,7 +34,7 @@ typedef enum
 @end
 
 
-@interface MRFileCache : NSObject <NSURLConnectionDataDelegate>
+@interface MRFileCache : NSObject
 {
     NSString                *m_strDirectory;
     NSMutableArray          *m_arrFiles;
@@ -44,7 +44,7 @@ typedef enum
 
 +(MRFileCache *)sharedFileCache;
 
-- (int)getFileSize:(NSString *)strFile;
+- (int64_t)getFileSize:(NSString *)strFile;
 - (BOOL)contains:(NSString *)strFile;
 - (NSString*)getFullPath:(NSString *)strFilename;
 - (NSDate *)lastModified:(NSString *)strFile;

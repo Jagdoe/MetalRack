@@ -83,7 +83,7 @@
 	{
 		// We have no ticks yet.
 		m_nTickCount = 0;
-		memset(m_sprTicks, (int)nil, sizeof(MRDefinitionSprite*) * MAX_LINE_TICKS);
+		memset(m_sprTicks, 0, sizeof(MRDefinitionSprite*) * MAX_LINE_TICKS);
 		m_strDot = @"dot.png"; // Should always have a dot.png in SoapRack projects.
 		m_fUseCurve = NO;
         m_flDistortionAngleMin = 15.0f;

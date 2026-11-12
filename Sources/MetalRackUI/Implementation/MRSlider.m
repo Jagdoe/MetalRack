@@ -1,6 +1,7 @@
 #include <TargetConditionals.h>
 #if TARGET_OS_IOS
 #import <UIKit/UIKit.h>
+#import "MRSelector.h"
 //
 //  C2DSlider.m
 //  Zombie
@@ -21,8 +22,8 @@
 //	if ([obImage isKindOfClass:[NSArray class]] == YES)
 //	{
 //		NSArray *aImage = (NSArray *)obImage;
-//		int numTypes = [aImage count];
-//		int nRandIndex = random() % numTypes;
+//		NSUInteger numTypes = [aImage count];
+//		NSUInteger nRandIndex = random() % numTypes;
 //		strImage = [aImage objectAtIndex:nRandIndex];
 //	}
 //	else
@@ -88,6 +89,13 @@
 	[m_buttonControl setPosition:MRPoint(flPosition, m_buttonControl.position.y)];
 }
 
+- (BOOL)pointerBegan:(MRPointerEvent *)event {
+    if(![self hitTest:event])return NO;
+    [self pointersBegan:[NSSet setWithObject:event]];return YES;
+}
+- (void)pointerMoved:(MRPointerEvent *)event {[self pointersMoved:[NSSet setWithObject:event]];}
+- (void)pointerEnded:(MRPointerEvent *)event {[self pointersEnded:[NSSet setWithObject:event]];}
+
 - (void)pointersBegan:(NSSet *)touches
 {
 //	if (enabled == NO)
@@ -143,7 +151,7 @@
 
 	if (m_idTouchBegin != nil && m_selTouchBegin != nil)
 	{
-		[m_idTouchBegin performSelector:m_selTouchBegin withObject:self];
+		MRInvokeCallback(m_idTouchBegin, m_selTouchBegin, 1, self, nil);
 	}
 
 	return; //NO
@@ -158,7 +166,7 @@
 
 	if (m_idTouchBegin != nil && m_selTouchBegin != nil)
 	{
-		[m_idTouchBegin performSelector:m_selTouchBegin withObject:self];
+		MRInvokeCallback(m_idTouchBegin, m_selTouchBegin, 1, self, nil);
 	}
 }
 

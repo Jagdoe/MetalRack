@@ -65,7 +65,7 @@ static NSString *sstrCharacterSet = @"01234567890/$.,'ABCDEFGHIJKLMNOPQRSTUVWXYZ
 	m_dictKernData = ([NSMutableDictionary dictionaryWithCapacity:70]);
 
 	// Set up and fill our value type array.
-	int nCount = [sstrCharacterSet length];
+	NSUInteger nCount = [sstrCharacterSet length];
 	for (int i = 0; i < nCount; ++i)
 	{
 		char bLetter = [sstrCharacterSet characterAtIndex:i];
@@ -142,7 +142,7 @@ static NSString *sstrCharacterSet = @"01234567890/$.,'ABCDEFGHIJKLMNOPQRSTUVWXYZ
 	m_dictKernData = [dictData objectForKey:@"height"];
 
     m_flFontSpacing = [[dictData objectForKey:@"font spacing"] floatValue];
-//    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+//    if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad)
 //        m_flFontSpacing *= 2.0f;
     float flDeviceAdjust = [MRUtilities getDeviceScaleAdjustment];
     m_flFontSpacing *= flDeviceAdjust;

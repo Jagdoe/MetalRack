@@ -10,6 +10,7 @@
 //
 
 #import "MRFileCache.h"
+#import "MRHTTPRequest.h"
 #import "MRSceneRuntime.h"
 
 #define MAX_THREADS         (2)
@@ -34,7 +35,7 @@
 
 - (void)dealloc
 {
-    NSLog(@"Fetch %x is about to release %x and %x", (int)self, (int)m_strSaveAs, (int)m_strURL);
+    NSLog(@"Fetch %p is about to release %@ and %@", self, m_strSaveAs, m_strURL);
     (void)0;
     m_strSaveAs = nil;
     (void)0;
@@ -93,7 +94,7 @@ static	MRFileCache		*sFileCache = nil;
 }
 
 
-- (int)getFileSize:(NSString *)strFile
+- (int64_t)getFileSize:(NSString *)strFile
 {
     if ([self contains:strFile] == YES)
     {
@@ -110,7 +111,7 @@ static	MRFileCache		*sFileCache = nil;
             }
             if (dictAttributes != nil)
             {
-                return [dictAttributes fileSize];
+                return (int64_t)[dictAttributes fileSize];
             }
         }
     }
@@ -288,7 +289,7 @@ static	MRFileCache		*sFileCache = nil;
                 [m_arrFetchThreads removeObject:thread];
             }
         }
-        nThreadCount = [m_arrFetchThreads count];
+        nThreadCount = (int)[m_arrFetchThreads count];
     }
 
     if (nThreadCount >= MAX_THREADS)
@@ -317,12 +318,11 @@ static	MRFileCache		*sFileCache = nil;
         NSString *strURLName = [arrURLParts lastObject];
         void     (^completionBlock)(NSString *strFilename, EFileChangeStatus eStatus) = [fetch.completionBlock copy];
 
-        NSLog(@"threadRun on [%x] with [%@] and [%@].", (int)fetch, strSaveAs, strURL);
+        NSLog(@"threadRun on [%p] with [%@] and [%@].", fetch, strSaveAs, strURL);
         if (strSaveAs != nil)
             strSaveName = strSaveAs;
         else
             strSaveName = strURLName;
-        (fetch);
         fetch = nil;
 
         NSURL *urlDownload = [NSURL URLWithString:strURL];
@@ -334,14 +334,15 @@ static	MRFileCache		*sFileCache = nil;
         EFileChangeStatus eStatus = FCS_NO_CHANGE;
         NSURLResponse *response = nil;
         NSError *error = nil;
-        NSData *data = [NSURLConnection sendSynchronousRequest:reqDownload returningResponse:&response error:&error];
+        MRHTTPResult *result=[MRHTTPRequest performRequest:reqDownload];
+        NSData *data=result.responseData;response=result.response;error=result.error;
         if (error == nil)
         {
             if ([self contains:strSaveName] == YES)
             {
                 NSLog(@"File already in cache: %@", strSaveName);
-                int nExistingSize = [self getFileSize:strSaveName];
-                int nNewSize = [response expectedContentLength];
+                int64_t nExistingSize = [self getFileSize:strSaveName];
+                int64_t nNewSize = [response expectedContentLength];
                 if (nExistingSize == nNewSize)
                 {
                     if (completionBlock != nil)
@@ -373,16 +374,16 @@ static	MRFileCache		*sFileCache = nil;
         {
             NSLog(@"FileCache fetch failed for: %@.", [error localizedDescription]);
             // Some errors we will retry, others we won't...
-            int nCode = [error code];
+            NSInteger nCode = [error code];
             if (nCode == NSURLErrorUnsupportedURL)
             {
                 // Don't  do anything...
-                NSLog(@"  Code %d: Cancelling request.", nCode);
+                NSLog(@"  Code %ld: Cancelling request.", (long)nCode);
             }
             else
             {
                 // Otherwise, let's retry.
-                NSLog(@"  Code %d: Requeing request.", nCode);
+                NSLog(@"  Code %ld: Requeing request.", (long)nCode);
                 [self fetchFileFromURL:strURL saveAs:strSaveAs];
             }
         }

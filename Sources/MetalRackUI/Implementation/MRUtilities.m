@@ -1,6 +1,7 @@
 #include <TargetConditionals.h>
 #if TARGET_OS_IOS
 #import <UIKit/UIKit.h>
+#import "MRSelector.h"
 //
 //  UtilityManager.h
 //  Zombie
@@ -30,7 +31,7 @@
 #endif
 
 // Third-party ASI HTTP stuff.
-#import "ASIFormDataRequest.h"
+#import "MRHTTPRequest.h"
 
 // Replacement UDID stuff.
 //#import "UIDevice+IdentifierAddition.h"
@@ -109,7 +110,7 @@ static int snNumKeyStyles = sizeof(sstrKeyStyles) / sizeof(NSString*);
 	if (sgUtilityManager == nil)
     {
         sgUtilityManager = [MRUtilities alloc];
-        [sgUtilityManager initWithOptions:dictOptions];
+        sgUtilityManager=[sgUtilityManager initWithOptions:dictOptions];
 //		sgUtilityManager = [[UtilityManager alloc] initWithOptions:dictOptions];
     }
 
@@ -330,13 +331,13 @@ static int snNumKeyStyles = sizeof(sstrKeyStyles) / sizeof(NSString*);
 
 	// Do we have this category?
 	NSArray *arrCategory = [dictionary objectForKey:strCategory];
-	int nItems = [arrCategory count];
+	NSUInteger nItems = [arrCategory count];
 	if (arrCategory == nil || nItems < 1)
 		return nil;
 
 	// We're just going to return an entry at random.
 	// Note: Use Option+Return for a carriage return.
-	int nIndex = random() % nItems;
+	NSUInteger nIndex = random() % nItems;
 	sstrQuote = [NSString stringWithFormat:@"%@", [arrCategory objectAtIndex:nIndex]];
 
 	(void)0;
@@ -348,13 +349,13 @@ static int snNumKeyStyles = sizeof(sstrKeyStyles) / sizeof(NSString*);
 {
 	NSString *strFont = @"Helvetica-Bold";//[[UtilityManager sharedUtilityManager] getDefaultFont];
 	UIFont *font = [UIFont fontWithName:strFont size:flFontSize];
-	CGSize sizeText = [strText sizeWithFont:font constrainedToSize:sizeRegion lineBreakMode:UILineBreakModeWordWrap];
+	CGSize sizeText = [strText boundingRectWithSize:sizeRegion options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:font} context:nil].size;
     int nTries = 0;
     while (sizeText.width <= 1 && nTries < 10) // If we have a long name and can't fit, shrink?
     {
         flFontSize -= 1.0f;
         UIFont *font = [UIFont fontWithName:strFont size:flFontSize];
-        sizeText = [strText sizeWithFont:font constrainedToSize:sizeRegion lineBreakMode:UILineBreakModeWordWrap];
+        sizeText = [strText boundingRectWithSize:sizeRegion options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:font} context:nil].size;
         ++nTries;
     }
     if (sizeText.width <= 1)
@@ -364,13 +365,13 @@ static int snNumKeyStyles = sizeof(sstrKeyStyles) / sizeof(NSString*);
     sizeText.height += 1;
 
 
-	MRSystemText *labelTextShadow = [MRSystemText labelWithString:strText dimensions:sizeText alignment:UITextAlignmentLeft
+	MRSystemText *labelTextShadow = [MRSystemText labelWithString:strText dimensions:sizeText alignment:NSTextAlignmentLeft
 													 fontName:strFont fontSize:flFontSize];
 
 	[labelTextShadow setColor:MRRGB(0, 0, 0)];
 	[labelTextShadow setAnchorPoint:MRPoint(0.5f, 1.0f)];
 
-	MRSystemText *labelText = [MRSystemText labelWithString:strText dimensions:sizeText alignment:UITextAlignmentLeft
+	MRSystemText *labelText = [MRSystemText labelWithString:strText dimensions:sizeText alignment:NSTextAlignmentLeft
 											   fontName:strFont fontSize:flFontSize];
 
 	[labelText setAnchorPoint:MRPoint(0.0f, 0.0f)];
@@ -420,7 +421,7 @@ static int snNumKeyStyles = sizeof(sstrKeyStyles) / sizeof(NSString*);
 
 + (int)getContentIntForKey:(NSString*)strKey
 {
-	int nValue = [suserDefaults integerForKey:strKey];
+	int nValue = (int)[suserDefaults integerForKey:strKey];
 	return nValue;
 }
 
@@ -549,7 +550,7 @@ static int snNumKeyStyles = sizeof(sstrKeyStyles) / sizeof(NSString*);
 + (int)getContentSubvalueForKey:(NSString*)strKey withSubvalue:(NSString*)strSubvalue
 {
 	NSString *strFull = [self getSubvalueKey:strKey withSubvalue:strSubvalue];
-	int nValue = [suserDefaults integerForKey:strFull];
+	int nValue = (int)[suserDefaults integerForKey:strFull];
 	return nValue;
 }
 
@@ -1196,7 +1197,7 @@ static int snDotCount = 0;
     // of the historical tablet coordinate multiplier without changing others.
     float configured=[[MRSceneHost option:@"deviceScaleAdjustment" fallback:nil] floatValue];
     if (isfinite(configured) && configured>0) return configured;
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+    if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad)
         return 2;
     else
         return 1;
@@ -1205,12 +1206,12 @@ static int snDotCount = 0;
 + (BOOL)isIPad1
 {
     NSString *strPlatform = [[MRUtilities sharedUtilityManager] getPlatform];
-    return (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad && [strPlatform hasPrefix:@"iPad1"] == YES);
+    return (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad && [strPlatform hasPrefix:@"iPad1"] == YES);
 }
 
 + (BOOL)isIPad
 {
-    return (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad);
+    return (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad);
 }
 
 #pragma mark -
@@ -1270,7 +1271,7 @@ static int snDotCount = 0;
         id idColor = [m_dictColors objectForKey:strColor];
         if ([idColor isKindOfClass:[NSArray class]] == YES)
         {
-            return [MRUtilities getColorInSet:strColor atIndex:random()];
+            return [MRUtilities getColorInSet:strColor atIndex:(int)random()];
         }
         else // Just a regular color.
         {
@@ -1564,13 +1565,7 @@ static int snDotCount = 0;
 
 - (NSString *)md5sum:(NSString *)plainStr
 {
-	unsigned char digest[CC_MD5_DIGEST_LENGTH], i;
-	CC_MD5([plainStr UTF8String], [plainStr lengthOfBytesUsingEncoding:NSUTF8StringEncoding], digest);
-	NSMutableString *ms = [NSMutableString string];
-	for (i=0;i<CC_MD5_DIGEST_LENGTH;i++) {
-		[ms appendFormat: @"%02x", (int)(digest[i])];
-	}
-	return ([ms copy]);
+    return [MRLegacyIdentifierDigest digest:[plainStr dataUsingEncoding:NSUTF8StringEncoding]];
 }
 
 - (NSString *)getDeviceTag
@@ -1685,7 +1680,7 @@ static int snDotCount = 0;
 
     // Split up our elements based on the & character.
     NSArray *arrItems = [strValues componentsSeparatedByString:@"&"];
-    int nCount = [arrItems count];
+    NSUInteger nCount = [arrItems count];
     for (__strong NSString *strItem in arrItems)
     {
         // Add separating &'s for each item.
@@ -1754,7 +1749,9 @@ static int snDotCount = 0;
     strRequest = [self localFreshenISCRequest:strRequest];
 
 	// Get rid of spaces 'n stuff.
-	NSString *strFixed =   [strRequest stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+	NSMutableCharacterSet *allowed=[[NSCharacterSet URLFragmentAllowedCharacterSet] mutableCopy];
+    [allowed addCharactersInString:@"#%[]"];
+    NSString *strFixed=[strRequest stringByAddingPercentEncodingWithAllowedCharacters:allowed];
 
 #ifdef DEBUG
 	NSLog(@"ISC Request: %@", strFixed);
@@ -1775,12 +1772,18 @@ static int snDotCount = 0;
 			(void)0;
 			m_dataISC = nil;
 		}
-		m_connectionISC = [[NSURLConnection alloc] initWithRequest: myRequest delegate: self];
+		m_connectionISC=[NSURLSession.sharedSession dataTaskWithRequest:myRequest completionHandler:^(NSData *data,NSURLResponse *response,NSError *error) {
+            dispatch_async(dispatch_get_main_queue(),^{
+                if(error)[self connection:m_connectionISC didFailWithError:error];
+                else {[self connection:m_connectionISC didReceiveData:data];[self connectionDidFinishLoading:m_connectionISC];}
+            });
+        }];
+        [m_connectionISC resume];
 	}
 	else
 	{
 		// Tom note: we don't care about response ... delegate to nil, don't set connection, and release.
-		([[NSURLConnection alloc] initWithRequest: myRequest delegate: nil]);
+		[[NSURLSession.sharedSession dataTaskWithRequest:myRequest] resume];
 	}
 }
 
@@ -1937,7 +1940,7 @@ static int snDotCount = 0;
 
 - (void)sendISCData:(NSData*)postData forFriend:(NSString*)strFriend forKey:(NSString*)strKey withDelegate:(id)idTarget forceSynchronous:(BOOL)fSynch
 {
-//    int nLength = [postData length];
+//    NSUInteger nLength = [postData length];
 //    NSLog(@"Data size = %d, Outgoing data = %@", nLength, postData);
 
     // Get standard params we care about.
@@ -1945,54 +1948,20 @@ static int snDotCount = 0;
 
     // Construct our URL.
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@", ISC_MAIN_URL, ISC_POSTDATA_SNIP]];
-    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:url];
-
-    // Our standard params.
-    [request setPostValue:[dictParams objectForKey:ISC_NAME_DEVICE_TAG] forKey:ISC_NAME_DEVICE_TAG];
-    [request setPostValue:[dictParams objectForKey:ISC_NAME_KEY] forKey:ISC_NAME_KEY];
-    [request setPostValue:[dictParams objectForKey:ISC_NAME_APP_NAME] forKey:ISC_NAME_APP_NAME];
-    if ([strFriend length] < 1)
-    {
-        // Send in ourselves...
-        [request setPostValue:[dictParams objectForKey:ISC_NAME_FACEBOOK] forKey:ISC_NAME_FACEBOOK];
-    }
-    else
-    {
-        // Send in our friend...
-        [request setPostValue:strFriend forKey:ISC_NAME_FACEBOOK];
-    }
-
-    // Our actual data or request.
-    if (postData != nil)
-    {
-        [request setPostValue:postData forKey:strKey];
-        [request setDidFinishSelector:@selector(ASIrequestSendPostFinished:)];
-        [request setDidFailSelector:@selector(ASIrequestSendPostFailed:)];
-    }
-    else
-    {
-        // We just want the existing data.
-        [request setPostValue:@"query" forKey:strKey];
-        [request setDidFinishSelector:@selector(ASIrequestGetPostFinished:)];
-        [request setDidFailSelector:@selector(ASIrequestgetPostFailed:)];
-    }
-
-    if (fSynch == NO)
-    {
-        // And send the request off into the queue.
-        if (idTarget == nil)
-            [request setDelegate:self];
-        else
-            [request setDelegate:idTarget];
-        [m_queueASI addOperation:request];
-        NSLog(@"Done with asynchronous.");
-    }
-    else
-    {
-        // Synchronous call -- for when we're suspending, etc.
-        [request startSynchronous];
-        NSLog(@"Done with synchronous.");
-    }
+    NSMutableDictionary *fields=[NSMutableDictionary dictionary];
+    for(NSString *key in @[ISC_NAME_DEVICE_TAG,ISC_NAME_KEY,ISC_NAME_APP_NAME])
+        if(dictParams[key])fields[key]=dictParams[key];
+    fields[ISC_NAME_FACEBOOK]=strFriend.length?strFriend:dictParams[ISC_NAME_FACEBOOK];
+    fields[strKey]=postData?:@"query";
+    NSURLRequest *request=[MRHTTPRequest formRequestWithURL:url fields:fields];
+    if(fSynch){[MRHTTPRequest performRequest:request];return;}
+    id target=idTarget?:self;
+    SEL finish=postData?@selector(ASIrequestSendPostFinished:):@selector(ASIrequestGetPostFinished:);
+    SEL fail=postData?@selector(ASIrequestSendPostFailed:):@selector(ASIrequestGetPostFailed:);
+    [m_queueASI addOperation:[[MRHTTPRequest alloc] initWithRequest:request completion:^(MRHTTPResult *result) {
+        SEL callback=result.error?fail:finish;
+        if([target respondsToSelector:callback])MRInvokeCallback(target, callback, 1, result, nil);
+    }]];
 }
 
 - (void)sendISCDataRequestForFriend:(NSString*)strFriend forKey:(NSString*)strKey withDelegate:(id)idTarget
@@ -2005,28 +1974,17 @@ static int snDotCount = 0;
 {
     // Construct our URL.
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@", ISC_MAIN_URL, ISC_FBFRIENDS_SNIP]];
-    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:url];
-
-    // Get standard params we care about.
-    NSDictionary *dictParams = [self genericParameters];
-
-    // Our standard params.
-    [request setPostValue:[dictParams objectForKey:ISC_NAME_DEVICE_TAG] forKey:ISC_NAME_DEVICE_TAG];
-    [request setPostValue:[dictParams objectForKey:ISC_NAME_KEY] forKey:ISC_NAME_KEY];
-    [request setPostValue:[dictParams objectForKey:ISC_NAME_APP_NAME] forKey:ISC_NAME_APP_NAME];
-
-    // Our Facebook Friends.
-    [request setPostValue:strFriends forKey:ISC_NAME_FACEBOOK_FRIENDS];
-
-    // Specify our non-default selectors.
-    [request setDidFinishSelector:@selector(ASIrequestFBFriends:)];
-
-    // And send the request off into the queue.
-    if (idTarget == nil)
-        [request setDelegate:self];
-    else
-        [request setDelegate:idTarget];
-    [m_queueASI addOperation:request];
+    NSDictionary *params=[self genericParameters];
+    NSMutableDictionary *fields=[NSMutableDictionary dictionary];
+    for(NSString *key in @[ISC_NAME_DEVICE_TAG,ISC_NAME_KEY,ISC_NAME_APP_NAME])
+        if(params[key])fields[key]=params[key];
+    if(strFriends)fields[ISC_NAME_FACEBOOK_FRIENDS]=strFriends;
+    NSURLRequest *request=[MRHTTPRequest formRequestWithURL:url fields:fields];
+    id target=idTarget?:self;
+    [m_queueASI addOperation:[[MRHTTPRequest alloc] initWithRequest:request completion:^(MRHTTPResult *result) {
+        SEL callback=result.error?@selector(requestFailed:):@selector(ASIrequestFBFriends:);
+        if([target respondsToSelector:callback])MRInvokeCallback(target, callback, 1, result, nil);
+    }]];
 }
 
 - (void)sendISCGenericMessage:(NSString *)strRequest
@@ -2037,31 +1995,31 @@ static int snDotCount = 0;
 #pragma mark -
 #pragma mark ISC Local Routines
 
-- (void)requestFinished:(ASIHTTPRequest *)request
+- (void)requestFinished:(MRHTTPResult *)request
 {
     // Don't do anything here for now.
     NSLog(@"ASI request finished okay.");
 }
 
-- (void)requestFailed:(ASIHTTPRequest *)request
+- (void)requestFailed:(MRHTTPResult *)request
 {
     NSError *error = [request error];
     NSLog(@"ASI Asynch error: %@", error);
 }
 
-- (void)ASIrequestSendPostFinished:(ASIHTTPRequest *)request
+- (void)ASIrequestSendPostFinished:(MRHTTPResult *)request
 {
     // Fall through to the default.
     [self requestFinished:request];
 }
 
-- (void)ASIrequestSendPostFailed:(ASIHTTPRequest *)request
+- (void)ASIrequestSendPostFailed:(MRHTTPResult *)request
 {
     // Fall through to the default.
     [self requestFailed:request];
 }
 
-- (void)ASIrequestGetPostFinished:(ASIHTTPRequest *)request
+- (void)ASIrequestGetPostFinished:(MRHTTPResult *)request
 {
     // Use when fetching text data
     NSString *responseString = [request responseString];
@@ -2074,7 +2032,7 @@ static int snDotCount = 0;
 
     //    NSLog(@"ASI Asynch Response: %@", responseString);
 
-    int nLength = [responseString length];
+    NSUInteger nLength = [responseString length];
 //    NSLog(@"  Asynch Response String size = %d, Data = %@", nLength, responseString);
     NSData *dataConverted = [MRUtilities createNSDataFromUTF8EncodedString:responseString];
     nLength = [dataConverted length];
@@ -2084,24 +2042,10 @@ static int snDotCount = 0;
     //    NSData *responseData = [request responseData];
 }
 
-- (void)ASIrequestGetPostFailed:(ASIHTTPRequest *)request
+- (void)ASIrequestGetPostFailed:(MRHTTPResult *)request
 {
     // Fall through to the default.
     [self requestFailed:request];
-}
-
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-	if (alertView.tag == ALERT_TAG_LINK && buttonIndex == 1)
-	{
-		UIAlertViewURL *alertURL = (UIAlertViewURL*)alertView;
-		// Jump somewhere...
-		if (alertURL.strURL != nil)
-		{
-			NSURL *url = [NSURL URLWithString:alertURL.strURL];
-			[[UIApplication sharedApplication] openURL:url];
-		}
-	}
 }
 
 - (void)ISCmailReward:(NSString*)strReward
@@ -2159,13 +2103,6 @@ static int snDotCount = 0;
 	if (strTitle == nil)
 		strTitle = @"Reward Error";
 
-	id idDelegate = nil;
-	BOOL fCanSpend = [[dictType objectForKey:@"Can Spend"] boolValue];
-	if (fCanSpend == YES)
-	{
-		idDelegate = self;
-	}
-
 	NSString *strMessage = [dictType objectForKey:strDetails];
 	if (strMessage == nil)
 	{
@@ -2173,19 +2110,9 @@ static int snDotCount = 0;
 		"contact us at support@inertsoap.com for help.";
 	}
 
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle
-													message:strMessage
-												   delegate:idDelegate
-										  cancelButtonTitle:@"Okay"
-										  otherButtonTitles:nil];
-	if (fCanSpend == YES)
-	{
-//		alert.tag = ALERT_TAG_PURCHASE;
-//		[alert addButtonWithTitle:@"Spend 'em!"];
-	}
-
-	[alert show];
-	(alert);
+    UIAlertController *alert=[UIAlertController alertControllerWithTitle:strTitle message:strMessage preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleCancel handler:nil]];
+    [[MRSceneHost getGameController] presentViewController:alert animated:YES completion:nil];
 
 	(void)0;
 //	// Set the RewardsController to ready.
@@ -2200,7 +2127,7 @@ static int snDotCount = 0;
 	// Explode our string into an array of message details.
 	NSArray *arrMessage = [strMessage componentsSeparatedByString:@"::"];
 
-    NSLog(@"Array has %d elements.", [arrMessage count]);
+    NSLog(@"Array has %lu elements.", (unsigned long)[arrMessage count]);
 
 	// To be valid, we must have a certain number of entries.
 	if ([arrMessage count] < 9)
@@ -2252,27 +2179,25 @@ static int snDotCount = 0;
 	NSString *strDetails = [arrMessage objectAtIndex:5];
 
 	// Buttons and URL.
-	id idDelegate = self;
 	NSString *strActionURL = [arrMessage objectAtIndex:6];
 	NSString *strActionTitle = [arrMessage objectAtIndex:7];
 	if ([strActionTitle length] < 1 || [strActionURL length] < 1)
 	{
-		idDelegate = nil;
 		strActionTitle = nil;
 		strActionURL = nil;
 	}
 	NSString *strCancelTitle = [arrMessage objectAtIndex:8];
 	if (strCancelTitle == nil || [strCancelTitle length] < 1)
 		strCancelTitle = @"Okay";
-	UIAlertViewURL *alert = [[UIAlertViewURL alloc] initWithTitle:strTitle
-														  message:strDetails
-														 delegate:idDelegate
-												cancelButtonTitle:strCancelTitle
-												otherButtonTitles:strActionTitle, nil];
-	alert.tag = ALERT_TAG_LINK;
-	alert.strURL = strActionURL;
-	[alert show];
-	(alert);
+    UIAlertController *alert=[UIAlertController alertControllerWithTitle:strTitle message:strDetails preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:strCancelTitle style:UIAlertActionStyleCancel handler:nil]];
+    if(strActionTitle && strActionURL) {
+        NSURL *url=[NSURL URLWithString:strActionURL];
+        [alert addAction:[UIAlertAction actionWithTitle:strActionTitle style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            [UIApplication.sharedApplication openURL:url options:@{} completionHandler:nil];
+        }]];
+    }
+    [[MRSceneHost getGameController] presentViewController:alert animated:YES completion:nil];
 
 	// Mark this message as read by us.
 	[MRUtilities setContentStatusForKey:strSeen asActive:YES];
@@ -2287,7 +2212,7 @@ static int snDotCount = 0;
 	// Explode our string into an array of message details.
 	NSArray *arrMessage = [strMessage componentsSeparatedByString:@"::"];
 
-    NSLog(@"Popup Array has %d elements.", [arrMessage count]);
+    NSLog(@"Popup Array has %lu elements.", (unsigned long)[arrMessage count]);
 
 	// To be valid, we must have a certain number of entries.
 	if ([arrMessage count] < 4)
@@ -2383,7 +2308,7 @@ static int snDotCount = 0;
     }
 
 	// Grant the reward.
-	int nValue = [[arrMessage objectAtIndex:6] integerValue];
+	int nValue = [[arrMessage objectAtIndex:6] intValue];
     [MRCurrencyStore adjustCurrency:MR_CURRENCY_FOR_UNLOCK withDelta:nValue];
 
 	// Title and Details.
@@ -2391,14 +2316,9 @@ static int snDotCount = 0;
 	NSString *strDetails = [arrMessage objectAtIndex:4];
 
 	// Show our reward message.
-	UIAlertView *alert = [[UIAlertViewURL alloc] initWithTitle:strTitle
-                                                       message:strDetails
-                                                      delegate:nil
-                                             cancelButtonTitle:@"Okay"
-                                             otherButtonTitles:nil];
-	alert.tag = ALERT_TAG_NONE;
-	[alert show];
-	(alert);
+    UIAlertController *alert=[UIAlertController alertControllerWithTitle:strTitle message:strDetails preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleCancel handler:nil]];
+    [[MRSceneHost getGameController] presentViewController:alert animated:YES completion:nil];
 
 	// Mark this reward as read by us.
 	[MRUtilities setContentStatusForKey:strSeen asActive:YES];
@@ -2407,7 +2327,7 @@ static int snDotCount = 0;
 #pragma mark -
 #pragma mark ASYNC XML Parsing
 
-- (void)connection:(NSURLConnection *) myConnection didReceiveData:(NSData *) myData
+- (void)connection:(NSURLSessionDataTask *) myConnection didReceiveData:(NSData *) myData
 {
 	if (m_dataISC)
 	{
@@ -2425,7 +2345,7 @@ static int snDotCount = 0;
     }
 }
 
-- (void)connection:(NSURLConnection *) myConnection didFailWithError:(NSError *) myError
+- (void)connection:(NSURLSessionDataTask *) myConnection didFailWithError:(NSError *) myError
 {
 	NSLog(@"ISC -- connection failed.");
 	(void)0;
@@ -2446,13 +2366,13 @@ static int snDotCount = 0;
         return 0;
 
 	// Do we have any queued requests to send?
-	int nCount = [m_arrQueuedRequests count];
+	NSUInteger nCount = [m_arrQueuedRequests count];
 	if (nCount > 0)
 	{
 		NSString *strRequest = [[m_arrQueuedRequests objectAtIndex:0] copy];
 		[m_arrQueuedRequests removeObjectAtIndex:0];
 		[self localSendISCRequest:strRequest withRetain:YES];
-        return nCount;
+        return (int)nCount;
 	}
     return 0;
 }
@@ -2462,7 +2382,7 @@ static int snDotCount = 0;
     m_idISCRequestDelegate = idDelegate;
 }
 
-- (void)connectionDidFinishLoading:(NSURLConnection *) myConnection
+- (void)connectionDidFinishLoading:(NSURLSessionDataTask *) myConnection
 {
 	[self startParsing:m_dataISC];
 	(void)0;
@@ -2511,7 +2431,7 @@ static int snDotCount = 0;
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
 {
 //NSLog(@"ISC Found String: %@", string);
-	int nLengthString = [string length];
+	NSUInteger nLengthString = [string length];
 
     MRSceneHost *appAss = [MRSceneHost sharedAppDelegate];
 
@@ -2657,7 +2577,7 @@ static int snDotCount = 0;
         SEL selGameFriends = @selector(facebookSetGameFriends:);
         if ([m_idFacebookCallbackOb respondsToSelector:selGameFriends])
         {
-            [m_idFacebookCallbackOb performSelector:selGameFriends withObject:string];
+            MRInvokeCallback(m_idFacebookCallbackOb, selGameFriends, 1, string, nil);
 
             // Now fetch their pictures
             NSArray *arrFriends = [string componentsSeparatedByString:@"|"];
@@ -2687,7 +2607,7 @@ static int snDotCount = 0;
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
 	//NSLog(@"ISC Ending Element: %@", elementName);
-	int nLengthString = [elementName length];
+	NSUInteger nLengthString = [elementName length];
 	if ([elementName isEqualToString:@"RequestFriendsSuccess"] && nLengthString > 4)
 	{
 		// We're done with a friends list ... notify someone if we want.
@@ -2723,211 +2643,52 @@ static int snDotCount = 0;
 
 - (void)initInApp
 {
-    // Make us a transaction observer.
-    [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
-
-	m_idPaymentCallbackOb = nil;
-	m_prodRequest = nil;
-	m_prodResponse = nil;
-	m_callBackOb = nil;
-
-    // Hack -- test.
-//    SKProductsRequest *request= [[SKProductsRequest alloc] initWithProductIdentifiers: [NSSet setWithObjects: @"Fingerzilla_LP", @"fz_currency_0", nil]];
-//    request.delegate = self;
-//    [request start];
+    m_idPaymentCallbackOb=nil;m_prodResponse=nil;m_callBackOb=nil;
 }
 
-- (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transactions
+- (void)attemptPaymentWithProductIdentifier:(NSString *)identifier callBackOb:(id)callback
 {
-	for (SKPaymentTransaction *transaction in transactions)
-	{
-		switch (transaction.transactionState)
-		{
-			case SKPaymentTransactionStatePurchased:
-				[self completeTransaction:transaction];
-				break;
-			case SKPaymentTransactionStateFailed:
-				[self failedTransaction:transaction];
-				break;
-			case SKPaymentTransactionStateRestored:
-				[self restoreTransaction:transaction];
-			default:
-				break;
-		}
-		[self notifyPurchaseofTransaction:transaction];
-	}
+    MRStoreProduct *product=[self getProductForID:identifier];
+    if(!product)return;
+    m_idPaymentCallbackOb=callback;
+    [MRStoreService.shared purchaseProduct:product];
 }
 
-- (void) failedTransaction: (SKPaymentTransaction *)transaction
+- (void)createRequest:(NSMutableSet *)identifiers callBackOb:(id)callback selector:(SEL)selector
 {
-	if (transaction.error.code != SKErrorPaymentCancelled)
-	{
-		// Optionally, display an error here.
-		NSLog(@"Failed [%@] for unknown reason [%@].", transaction.payment.productIdentifier, transaction.error);
-        if ([m_callBackOb respondsToSelector:@selector(inAppTransactionFailed:)])
-        {
+    if(m_productRequestPending)return;
+    m_callBackOb=callback;m_callBackSelector=selector;m_productRequestPending=YES;
+    [MRStoreService.shared startObservingWithDelivery:^BOOL(MRStoreTransaction *transaction) {
+        if([m_callBackOb respondsToSelector:@selector(inAppTransactionComplete:)])
+            [m_callBackOb performSelector:@selector(inAppTransactionComplete:) withObject:transaction];
+        else if(m_callBackOb)
+            [MRUtilities setContentStatusForKey:transaction.productIdentifier asActive:YES];
+        else return NO;
+        return YES;
+    } notification:^(MRStoreTransaction *transaction) {
+        if(transaction.error && [m_callBackOb respondsToSelector:@selector(inAppTransactionFailed:)])
             [m_callBackOb performSelector:@selector(inAppTransactionFailed:) withObject:transaction];
-        }
-	}
-	else
-	{
-		NSLog(@"Failed -- cancelled payment.");
-	}
-	[[SKPaymentQueue defaultQueue] finishTransaction: transaction];
-}
-
-- (void) restoreTransaction: (SKPaymentTransaction *)transaction
-{
-	// Fall through so we're synchronized.
-	[self completeTransaction:transaction];
-}
-
-- (void) completeTransaction: (SKPaymentTransaction *)transaction
-{
-	//Provide the new content
-    NSLog(@"InApp -- completeTransaction!");
-    if ([m_callBackOb respondsToSelector:@selector(inAppTransactionComplete:)])
-    {
-        [m_callBackOb performSelector:@selector(inAppTransactionComplete:) withObject:transaction];
-    }
-    else
-    {
-        [MRUtilities setContentStatusForKey:transaction.payment.productIdentifier asActive:YES];
-    }
-
-	[[SKPaymentQueue defaultQueue] finishTransaction: transaction];
-}
-
-- (void)attemptPaymentWithProductIdentifier:(NSString *)strID callBackOb:(id)idCallback
-{
-    // Can we even submit payments?
-    if ([SKPaymentQueue canMakePayments] == NO)
-    {
-        NSLog(@"In-App: Cannot Make Payments.");
-        return;
-    }
-
-    // Go through and find the matching product for this identifier.
-    SKProduct *product = [self getProductForID:strID];
-    if (product != nil)
-    {
-        SKPayment *payment = [SKPayment paymentWithProduct:product];
-        m_idPaymentCallbackOb = idCallback;
-        NSLog(@"Attempting Purchase of [%@]", strID);
-        [[SKPaymentQueue defaultQueue] addPayment:payment];
-    }
-}
-
-- (void)notifyPurchaseofTransaction:(SKPaymentTransaction *)transaction
-{
-	// Just tell our Purchase Screen about this, so it can update itself, etc.
-	if (m_idPaymentCallbackOb != nil)
-		[m_idPaymentCallbackOb performSelector:@selector(showInProgress:) withObject:transaction];
-	//		[m_idPaymentCallbackOb showInProgress:transaction];
-}
-
-// Purchasing response delegate
-#pragma mark -
-#pragma mark Purchasing Response Delegate
-
-- (void)createRequest:(NSMutableSet *)setPacks callBackOb:(id)idOb selector:(SEL)selCallBack
-{
-    NSLog(@"At start of createRequest.");
-
-    // Let's not do this if we have a pending request.
-    if (m_prodRequest != nil)
-    {
-        NSLog(@"inApp: We have a pending product request, so not sending a new request.");
-        return;
-    }
-
-	m_callBackOb = idOb;
-	m_callBackSelector = selCallBack;
-	// Tom says: I think this part is caching response from earlier request, to be faster?
-	//	if (m_prodRequest != nil)
-	//	{
-	//		[m_callBackOb performSelector:m_callBackSelector];
-	//		return;
-	//	}
-
-	// Clear any old response.
-	(void)0;
-	m_prodResponse = nil;
-
-    (void)0;
-    m_prodRequest = nil;
-
-	m_prodRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:setPacks];
-	m_prodRequest.delegate = self;
-	[m_prodRequest start];
-
-
-    NSLog(@"At end of createRequest.");
+        if([m_idPaymentCallbackOb respondsToSelector:@selector(showInProgress:)])
+            [m_idPaymentCallbackOb performSelector:@selector(showInProgress:) withObject:transaction];
+    }];
+    [MRStoreService.shared loadProducts:identifiers completion:^(MRStoreResponse *response,NSError *error) {
+        m_productRequestPending=NO;m_prodResponse=response;
+        if(error)NSLog(@"Store request failed: %@",error);
+        if([m_callBackOb respondsToSelector:m_callBackSelector])
+            MRInvokeCallback(m_callBackOb, m_callBackSelector, 0, nil, nil);
+    }];
 }
 
 - (void)cancelRequest
 {
-	// Just get rid of our various objects.
-	m_callBackOb = nil;
-	m_callBackSelector = nil;
-
-    (void)0;
-    m_prodRequest = nil;
-    (void)0;
-    m_prodResponse = nil;
+    m_callBackOb=nil;m_callBackSelector=NULL;m_prodResponse=nil;
 }
 
-- (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response
+- (MRStoreResponse *)getStoreResponse { return m_prodResponse; }
+- (MRStoreProduct *)getProductForID:(NSString *)identifier
 {
-    (void)0;
-    m_prodResponse = nil;
-
-	m_prodResponse = (response);
-
-	[m_callBackOb performSelector:m_callBackSelector];
-
-    // Hack test.
-    NSArray *arrItems = response.products;
-    for (SKProduct *product in arrItems)
-    {
-        NSLog(@"--Got product: [%@]", product.productIdentifier);
-    }
-    arrItems = response.invalidProductIdentifiers;
-    for (NSString *strProduct in arrItems)
-    {
-        NSLog(@"--Failed product: [%@]", strProduct);
-    }
-
-    // Clear our request?
-    (void)0;
-    m_prodRequest = nil;
-}
-
-- (void)request:(SKRequest *)request didFailWithError:(NSError *)error
-{
-	NSLog(@"Store request failed.");
-
-    (void)0;
-    m_prodRequest = nil;
-
-//	[request autorelease];
-}
-
-- (SKProductsResponse*)getStoreResponse
-{
-	return m_prodResponse;
-}
-
-- (SKProduct *)getProductForID:(NSString*)strID
-{
-    for (SKProduct *prodValid in m_prodResponse.products)
-    {
-        NSString *strProdID = prodValid.productIdentifier;
-        if ([strID isEqualToString:strProdID])
-            return prodValid;
-    }
-
-    // Didn't find it!
+    for(MRStoreProduct *product in m_prodResponse.products)
+        if([identifier isEqual:product.productIdentifier])return product;
     return nil;
 }
 
@@ -2957,9 +2718,8 @@ static int snDotCount = 0;
 	[vcMail setSubject:@"Free \"Everybody Hates NASA\" Reward"];
 	[vcMail setMessageBody:strBody isHTML:YES];
 
-	[gcGame presentModalViewController:vcMail animated:YES];
-	(vcMail);
-	vcMail.mailComposeDelegate = gcGame;
+	[gcGame presentViewController:vcMail animated:YES completion:nil];
+	vcMail.mailComposeDelegate = (id<MFMailComposeViewControllerDelegate>)gcGame;
 }
 
 - (void)applyReward:(BOOL)fWasMine
@@ -3017,7 +2777,7 @@ static int snDotCount = 0;
 
 	m_arrLeaderboardRankRequests = [[NSMutableArray alloc] initWithCapacity:16];
     m_arrLeaderboardRequestsPending = ([NSMutableArray arrayWithCapacity:5]);
-	m_leaderboardRequestForDistance = nil;
+	m_distanceRequestPending = NO;
 
 	// Set up a notification for when the player changes while we're backgrounded.
 	if ([self GCisAvailable] == YES)
@@ -3076,83 +2836,37 @@ static int snDotCount = 0;
 
 - (void) GCauthenticateLocalPlayer
 {
-	if ([self GCisAvailable] == NO)
-		return;
-
-	// Any time we call this, reset our authenticated status.
-	m_fLocalPlayerAuthenticated = NO;
-
-    [[GKLocalPlayer localPlayer] authenticateWithCompletionHandler:^(NSError *error) {
-		if (error == nil)
-		{
-			// Insert code here to handle a successful authentication.
-			NSLog(@"GameCenter -- authenticated player!");
-			m_fLocalPlayerAuthenticated = YES;
-			// Make sure we've copied in the alias/nickname.
-			self.nickname = [GKLocalPlayer localPlayer].alias;
-			// Look up our leaderboard information now.
-			[self GCloadLeaderboardCategories];
-//			[self GCloadNextDistanceBatch];
-		}
-		else
-		{
-			// Your application can process the error parameter to report the error to the player.
-			NSLog(@"GameCenter -- FAILED to authenticate with error %@", error);
-			m_fLocalPlayerAuthenticated = NO;
-		}
-	}];
+    if(![self GCisAvailable])return;
+    m_fLocalPlayerAuthenticated=NO;
+    GKLocalPlayer.localPlayer.authenticateHandler=^(UIViewController *controller,NSError *error) {
+        if(controller)[[MRSceneHost getGameController] presentViewController:controller animated:YES completion:nil];
+        m_fLocalPlayerAuthenticated=GKLocalPlayer.localPlayer.authenticated;
+        if(m_fLocalPlayerAuthenticated){self.nickname=GKLocalPlayer.localPlayer.alias;[self GCloadLeaderboardCategories];}
+        if(error)NSLog(@"GameCenter authentication: %@",error);
+    };
 }
 
-- (void) GCreportScore:(Float64)flScore forCategory:(NSString*)strCategory
+- (void) GCreportScore:(Float64)score forCategory:(NSString *)identifier
 {
-	if ([self GCisAvailable] == NO || [self GCisAuthenticated] == NO)
-		return;
-
-    GKScore *scoreReporter = ([[GKScore alloc] initWithCategory:strCategory]);
-    scoreReporter.value = flScore;
-
-    [scoreReporter reportScoreWithCompletionHandler:^(NSError *error)
-	{
-		if (error != nil)
-		{
-            // handle the reporting error
-			NSLog(@"GameCenter -- unable to report score! Score will be updated next time we complete a level.");
-        }
-		else
-		{
-			[self GCloadRank:strCategory];
-			NSLog(@"GameCenter -- successfully reported score!");
-		}
+    if(![self GCisAvailable] || ![self GCisAuthenticated])return;
+    [GKLeaderboard submitScore:(NSInteger)score context:0 player:GKLocalPlayer.localPlayer leaderboardIDs:@[identifier] completionHandler:^(NSError *error) {
+        if(error)NSLog(@"GameCenter score reporting: %@",error);else [self GCloadRank:identifier];
     }];
 }
 
 - (void) GCshowLeaderboard
 {
-	if ([self GCisAvailable] == NO || [self GCisAuthenticated] == NO)
-		return;
-
-    GKLeaderboardViewController *leaderboardController = [[GKLeaderboardViewController alloc] init];
-    if (leaderboardController != nil)
-    {
-		UIViewController *gcGame = [MRSceneHost getGameController];
-        leaderboardController.leaderboardDelegate = gcGame;
-        [gcGame presentModalViewController: leaderboardController animated: YES];
-    }
+    if(![self GCisAvailable] || ![self GCisAuthenticated])return;
+    GKGameCenterViewController *controller=[[GKGameCenterViewController alloc] initWithState:GKGameCenterViewControllerStateLeaderboards];
+    controller.gameCenterDelegate=(id<GKGameCenterControllerDelegate>)[MRSceneHost getGameController];
+    [[MRSceneHost getGameController] presentViewController:controller animated:YES completion:nil];
 }
-
-- (void) GCshowLeaderboardWithBoard:(NSString*)strLeaderboard
+- (void) GCshowLeaderboardWithBoard:(NSString *)identifier
 {
-	if ([self GCisAvailable] == NO || [self GCisAuthenticated] == NO)
-		return;
-
-    GKLeaderboardViewController *leaderboardController = [[GKLeaderboardViewController alloc] init];
-    if (leaderboardController != nil)
-    {
-		UIViewController *gcGame = [MRSceneHost getGameController];
-        leaderboardController.leaderboardDelegate = gcGame;
-		leaderboardController.category = strLeaderboard;
-        [gcGame presentModalViewController: leaderboardController animated: YES];
-    }
+    if(![self GCisAvailable] || ![self GCisAuthenticated])return;
+    GKGameCenterViewController *controller=[[GKGameCenterViewController alloc] initWithLeaderboardID:identifier playerScope:GKLeaderboardPlayerScopeGlobal timeScope:GKLeaderboardTimeScopeAllTime];
+    controller.gameCenterDelegate=(id<GKGameCenterControllerDelegate>)[MRSceneHost getGameController];
+    [[MRSceneHost getGameController] presentViewController:controller animated:YES completion:nil];
 }
 
 - (void) GCreportAchievementIdentifier:(NSString*)strAchievement percentComplete:(float)flPercent
@@ -3175,7 +2889,7 @@ static int snDotCount = 0;
 //            NSLog(@"found the setter!");
             achievement.showsCompletionBanner = YES;
         }
-		[achievement reportAchievementWithCompletionHandler:^(NSError *error)
+		[GKAchievement reportAchievements:@[achievement] withCompletionHandler:^(NSError *error)
 		 {
 			 if (error != nil)
 			 {
@@ -3192,17 +2906,10 @@ static int snDotCount = 0;
 
 - (void) GCshowAchievements
 {
-	if ([self GCisAvailable] == NO || [self GCisAuthenticated] == NO)
-		return;
-
-    GKAchievementViewController *achievements = [[GKAchievementViewController alloc] init];
-    if (achievements != nil)
-    {
-		UIViewController *gcGame = [MRSceneHost getGameController];
-        achievements.achievementDelegate = gcGame;
-        [gcGame presentModalViewController: achievements animated: YES];
-    }
-    (void)0;
+    if(![self GCisAvailable] || ![self GCisAuthenticated])return;
+    GKGameCenterViewController *controller=[[GKGameCenterViewController alloc] initWithState:GKGameCenterViewControllerStateAchievements];
+    controller.gameCenterDelegate=(id<GKGameCenterControllerDelegate>)[MRSceneHost getGameController];
+    [[MRSceneHost getGameController] presentViewController:controller animated:YES completion:nil];
 }
 
 - (NSString*) GCgetAlias
@@ -3242,29 +2949,13 @@ static int snDotCount = 0;
 
 - (void) GCloadLeaderboardCategories
 {
-	if ([self GCisAvailable] == NO || [self GCisAuthenticated] == NO)
-		return;
-
-	[GKLeaderboard loadCategoriesWithCompletionHandler:^(NSArray *categories, NSArray *titles, NSError *error) {
-        if (error != nil)
-        {
-            // handle the error
-			NSLog(@"GameCenter -- Unable to load leaderboards");
-			return;
-        }
-        // use the category and title information
-		// Clear any old data in our arrays...
-		(void)0;
-		m_arrLeaderboardNames = nil;
-		(void)0;
-		m_arrLeaderboardCategories = nil;
-
-		// Copy in the data for local storage (could we keep a ref to it? Don't know).
-		m_arrLeaderboardNames = ([titles copy]);
-		m_arrLeaderboardCategories = ([categories copy]);
-//		[self GCloadRanks];
-	}];
-
+    if(![self GCisAvailable] || ![self GCisAuthenticated])return;
+    [GKLeaderboard loadLeaderboardsWithIDs:nil completionHandler:^(NSArray<GKLeaderboard *> *boards,NSError *error) {
+        if(error){NSLog(@"GameCenter leaderboards: %@",error);return;}
+        NSMutableArray *names=[NSMutableArray array],*identifiers=[NSMutableArray array];
+        for(GKLeaderboard *board in boards){[names addObject:board.title?:@""];[identifiers addObject:board.baseLeaderboardID];}
+        m_arrLeaderboardNames=[names copy];m_arrLeaderboardCategories=[identifiers copy];
+    }];
 }
 
 - (const int *)getRanks
@@ -3308,76 +2999,24 @@ static int snDotCount = 0;
 }
 
 
-- (void)localGCSendRankRequest:(NSString *)strLeaderboard
+- (void)localGCSendRankRequest:(NSString *)identifier
 {
-	NSArray *arrLocalPlayer = [NSArray arrayWithObject:[GKLocalPlayer localPlayer].playerID];
-
-    if (m_arrLeaderboardRequestsPending == nil)
-        m_arrLeaderboardRequestsPending = ([NSMutableArray arrayWithCapacity:5]);
-
-	GKLeaderboard *leaderboardRequestForRank = ([[GKLeaderboard alloc] initWithPlayerIDs:arrLocalPlayer]);
-	if (leaderboardRequestForRank != nil)
-	{
-		leaderboardRequestForRank.category = strLeaderboard;
-		leaderboardRequestForRank.playerScope = GKLeaderboardPlayerScopeGlobal;
-		leaderboardRequestForRank.timeScope = GKLeaderboardTimeScopeAllTime;
-        [m_arrLeaderboardRequestsPending addObject:leaderboardRequestForRank];
-		[leaderboardRequestForRank loadScoresWithCompletionHandler: ^(NSArray *scores, NSError *error)
-		 {
-			 if (error != nil)
-			 {
-				 // For now, we don't care if we can't get a batch of distance scores.
-				 NSLog(@"Error %@ on request for leaderboard %@.", error, strLeaderboard);
-			 }
-			 if (scores != nil && [scores count] > 0)
-			 {
-#ifdef DEBUG
-				 NSLog(@"GC -- got %d new rank entries.", [scores count]);
-#endif
-				 GKScore *scoreOb = [scores objectAtIndex:0];
-				 int nIndex = 0;
-				 for (NSString *strLeaderboard in m_arrLeaderboardCategories)
-				 {
-					 if ([strLeaderboard isEqualToString:scoreOb.category] == YES)
-						 break;
-					 nIndex++;
-				 }
-				 m_nRanks[nIndex] = scoreOb.rank;
-				 NSString *strRankPref = [NSString stringWithFormat:@"RANK|%@", strLeaderboard];
-				 [MRUtilities setContentIntForKey:strRankPref withInt:scoreOb.rank];
-
-			 }
-			 else
-			 {
-				 int nIndex = [m_arrLeaderboardCategories indexOfObject:strLeaderboard];
-				 if (nIndex >= 0)
-				 {
-					 m_nRanks[nIndex] = 0;
-				 }
-				 NSString *strRankPref = [NSString stringWithFormat:@"RANK|%@", strLeaderboard];
-				 [MRUtilities setContentIntForKey:strRankPref withInt:0];
-			 }
-
-			 // We're done with leaderboard request.
-#ifdef DEBUG
-			 NSLog(@"GC -- clearing old RANK request.");
-#endif
-//			 [m_leaderboardRequestForRank release];
-//			 m_leaderboardRequestForRank = nil;
-
-             [m_arrLeaderboardRequestsPending removeObject:leaderboardRequestForRank];
-
-			 // Do we have a queued request?
-			 if ([m_arrLeaderboardRankRequests count] > 0)
-			 {
-				 NSString *strLeaderboard = [m_arrLeaderboardRankRequests objectAtIndex:0];
-//				 NSLog(@"GC -- sending queued Rank request or [%@] (%d pending).", strLeaderboard, [m_arrLeaderboardRankRequests count]);
-				 [self localGCSendRankRequest:strLeaderboard];
-				 [m_arrLeaderboardRankRequests removeObjectAtIndex:0];
-			 }
-
-		 }];
-	}
+    if(!m_arrLeaderboardRequestsPending)m_arrLeaderboardRequestsPending=[NSMutableArray array];
+    [m_arrLeaderboardRequestsPending addObject:identifier];
+    [GKLeaderboard loadLeaderboardsWithIDs:@[identifier] completionHandler:^(NSArray<GKLeaderboard *> *boards,NSError *error) {
+        void (^complete)(GKLeaderboardEntry *,NSError *)=^(GKLeaderboardEntry *entry,NSError *error) {
+            if(!error) {
+                NSUInteger index=[m_arrLeaderboardCategories indexOfObject:identifier];
+                if(index<LEADERBOARDS_MAX)m_nRanks[index]=(int)MIN(entry.rank,INT_MAX);
+                [MRUtilities setContentIntForKey:[@"RANK|" stringByAppendingString:identifier] withInt:(int)MIN(entry.rank,INT_MAX)];
+            }
+            [m_arrLeaderboardRequestsPending removeObject:identifier];
+            if(m_arrLeaderboardRankRequests.count){NSString *next=m_arrLeaderboardRankRequests.firstObject;[m_arrLeaderboardRankRequests removeObjectAtIndex:0];[self localGCSendRankRequest:next];}
+        };
+        GKLeaderboard *board=boards.firstObject;
+        if(!board){complete(nil,error);return;}
+        [board loadEntriesForPlayers:@[GKLocalPlayer.localPlayer] timeScope:GKLeaderboardTimeScopeAllTime completionHandler:^(GKLeaderboardEntry *local,NSArray<GKLeaderboardEntry *> *entries,NSError *error){complete(local,error);}];
+    }];
 }
 
 - (void)GCloadRank:(NSString *)strLeaderboard
@@ -3430,89 +3069,22 @@ static int snDotCount = 0;
 
 - (void)GCloadNextDistanceBatch
 {
-	if ([self GCisAvailable] == NO || [self GCisAuthenticated] == NO)
-		return;
-
-	m_fDistancesLoaded = NO;
-
-	// If we have an outstanding leaderboard request, don't do anything?
-	if (m_leaderboardRequestForDistance != nil)
-	{
-		NSLog(@"GClNDB -- leaderboard request pending!");
-		return;
-	}
-	NSLog(@"GC -- asking for next distance batch.");
-
-	// Get our distance board...
-	NSString *strLeaderboard = [self GCgetLeaderboardCurrentForType:@"distance"];
-
-	m_leaderboardRequestForDistance = [[GKLeaderboard alloc] init];
-    if (m_leaderboardRequestForDistance != nil)
-    {
-		m_leaderboardRequestForDistance.category = strLeaderboard;
-		m_leaderboardRequestForDistance.playerScope = GKLeaderboardPlayerScopeGlobal;
-        m_leaderboardRequestForDistance.timeScope = GKLeaderboardTimeScopeAllTime;
-		// NYI -- determine which range we want.
-        m_leaderboardRequestForDistance.range = NSMakeRange(1,100);
-        [m_leaderboardRequestForDistance loadScoresWithCompletionHandler: ^(NSArray *scores, NSError *error) {
-            if (error != nil)
-            {
-				// For now, we don't care if we can't get a batch of distance scores.
+    if(![self GCisAvailable] || ![self GCisAuthenticated] || m_distanceRequestPending)return;
+    m_distanceRequestPending=YES;m_fDistancesLoaded=NO;
+    NSString *identifier=[self GCgetLeaderboardCurrentForType:@"distance"];
+    [GKLeaderboard loadLeaderboardsWithIDs:@[identifier] completionHandler:^(NSArray<GKLeaderboard *> *boards,NSError *error) {
+        GKLeaderboard *board=boards.firstObject;
+        if(!board){m_distanceRequestPending=NO;return;}
+        [board loadEntriesForPlayerScope:GKLeaderboardPlayerScopeGlobal timeScope:GKLeaderboardTimeScopeAllTime range:NSMakeRange(1,100) completionHandler:^(GKLeaderboardEntry *local,NSArray<GKLeaderboardEntry *> *entries,NSInteger total,NSError *error) {
+            [self GCClearOldDistancesData];
+            if(entries && !error) {
+                m_arrDistanceScores=[entries mutableCopy];m_dictDistancePlayers=[NSMutableDictionary dictionary];
+                for(GKLeaderboardEntry *entry in entries)if(entry.player.gamePlayerID.length)m_dictDistancePlayers[entry.player.gamePlayerID]=entry.player;
+                m_fDistancesLoaded=YES;
             }
-            if (scores != nil)
-            {
-				NSLog(@"GameCenter -- got %d distance scores!", [scores count]);
-				// Get rid of any old data.
-				[self GCClearOldDistancesData];
-
-				// If we got any valid scores, copy them into our local mutable array.
-				if ([scores count] > 0)
-				{
-					m_arrDistanceScores = ([NSMutableArray arrayWithArray:scores]);
-
-					// Now we also need to get the player information before we can consider ourselves fully loaded.
-					NSMutableArray *arrIDs = [NSMutableArray arrayWithCapacity:[m_arrDistanceScores count]];
-					for (GKScore *score in scores)
-					{
-						[arrIDs addObject:score.playerID];
-					}
-					[GKPlayer loadPlayersForIdentifiers:arrIDs withCompletionHandler:^(NSArray *players, NSError *error) {
-						if (error != nil)
-						{
-							// Didn't work.  Remove any old data.
-							[self GCClearOldDistancesData];
-						}
-						if (players != nil)
-						{
-//							NSLog(@"GameCenter -- got %d matching distance players!", [players count]);
-							// Store these in a copied dictionary as well...
-							(void)0;
-							m_dictDistancePlayers = nil;
-							m_dictDistancePlayers = ([NSMutableDictionary dictionaryWithCapacity:[players count]]);
-							for (GKPlayer *playerNew in players)
-							{
-//								NSLog(@"  Trying to add player [%@]", playerNew);
-								if ([playerNew.playerID isEqualToString:@"G: ANONYMOUS"] == NO)
-								{
-//									NSLog(@"Player is %@.", playerNew.playerID);
-									[m_dictDistancePlayers setObject:playerNew forKey:playerNew.playerID];
-								}
-							}
-//							NSLog(@"GC -- ended with %d players.", [m_dictDistancePlayers count]);
-
-							// ...And mark that we're finally ready to report.
-							m_fDistancesLoaded = YES;
-						}
-					}];
-				}
-            }
-			// Get rid of the old leaderboard request now.
-			NSLog(@"GClNDB -- clearing old leaderboard request!");
-			(void)0;
-			m_leaderboardRequestForDistance = nil;
-		}];
-	}
-
+            m_distanceRequestPending=NO;
+        }];
+    }];
 }
 
 + (id) createNSDataFromUTF8EncodedString:(NSString *) string
@@ -3586,7 +3158,7 @@ static int snDotCount = 0;
     {
         MRSocialService *fbMan = [MRSocialService sharedFBManager];
 
-        [fbMan initFacebookWithAppId:MR_FACEBOOK_APP_ID];
+        fbMan=[fbMan initFacebookWithAppId:MR_FACEBOOK_APP_ID];
         fbMan.idDelegate = self;
         //            [fbMan requestWithGraphPath:@"me/friends"];
     }
@@ -3617,7 +3189,7 @@ static int snDotCount = 0;
         SEL selChanged = @selector(facebookHasChanged:);
         if ([m_idFacebookCallbackOb respondsToSelector:selChanged])
         {
-            [m_idFacebookCallbackOb performSelector:selChanged withObject:m_strFacebookID];
+            MRInvokeCallback(m_idFacebookCallbackOb, selChanged, 1, m_strFacebookID, nil);
         }
         else
         {
@@ -3652,7 +3224,7 @@ static int snDotCount = 0;
         SEL selFriends = @selector(facebookGotFriends:);
         if ([m_idFacebookCallbackOb respondsToSelector:selFriends])
         {
-            [m_idFacebookCallbackOb performSelector:selFriends withObject:strFriendsList];
+            MRInvokeCallback(m_idFacebookCallbackOb, selFriends, 1, strFriendsList, nil);
         }
 
     }
@@ -3681,9 +3253,5 @@ static int snDotCount = 0;
 #pragma mark -
 #pragma mark AlertViewURL
 
-@implementation UIAlertViewURL
-
-@synthesize strURL = m_strURL;
-
-@end	// AlertJump
+	// AlertJump
 #endif

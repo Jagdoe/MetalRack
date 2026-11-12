@@ -13,7 +13,7 @@
 #import "MRAudio.h"
 #import "MRDefinitions.h"
 #import <AVFoundation/AVAudioSession.h>
-#import "MROpenAL.h"
+
 #import "MRUtilities.h"
 
 @implementation MRAudio
@@ -64,12 +64,12 @@ static MRAudio     *m_sSingleton = nil;
 
 - (void)addSound:(NSString *)strSound
 {
-	MROpenAL *openAL = [MROpenAL sharedMyOpenAL];
-
-	NSLog(@"  AM: Loading %@.", strSound);
-	[openAL loadSoundWithKey:strSound File:strSound Ext:@"caf" Loop:NO];
-
-	return;
+    NSURL *url=[NSBundle.mainBundle URLForResource:strSound withExtension:@"caf"];
+    if(!url)return;
+    NSError *error=nil;
+    AVAudioPlayer *player=[[AVAudioPlayer alloc] initWithContentsOfURL:url error:&error];
+    if(!player){NSLog(@"Unable to load sound %@: %@",strSound,error);return;}
+    player.volume=m_flSoundsVolume;[player prepareToPlay];m_dictSounds[strSound]=player;
 }
 
 // Set up our sound stuff.
@@ -80,8 +80,6 @@ static MRAudio     *m_sSingleton = nil;
 
 	NSDictionary *dictSoundEffects = [[MRDefinitions sharedDefsManager] getDefByClass:@"SoundEffect" Type:nil];
 
-	MROpenAL *openAL = [MROpenAL sharedMyOpenAL];
-	[openAL setVolume:m_flSoundsVolume];
 
 	m_dictSounds = [[NSMutableDictionary alloc] initWithCapacity:INITIAL_ARRAY_CAPACITY];
 
@@ -128,8 +126,9 @@ static MRAudio     *m_sSingleton = nil;
 
 - (void)soundsDestroy
 {
-	// Our individual sounds should be auto-released, so just clear the array.
-	(void)0;
+	// Stop and release all cached effects.
+    for(AVAudioPlayer *sound in m_dictSounds.allValues)[sound stop];
+    [m_dictSounds removeAllObjects];
 }
 
 - (void)soundsSetCachedStatus:(BOOL)fSound
@@ -159,8 +158,8 @@ static MRAudio     *m_sSingleton = nil;
 	if ([obSound isKindOfClass:[NSArray class]] == YES)
 	{
 		NSArray *aSound = (NSArray *)obSound;
-		int numTypes = [aSound count];
-		int nRandIndex = random() % numTypes;
+		NSUInteger numTypes = [aSound count];
+		NSUInteger nRandIndex = random() % numTypes;
 		strSound = [aSound objectAtIndex:nRandIndex];
 	}
 	else if ([obSound isKindOfClass:[NSString class]] == YES)
@@ -174,8 +173,8 @@ static MRAudio     *m_sSingleton = nil;
         if ([obSound isKindOfClass:[NSArray class]] == YES)
         {
             NSArray *aSound = (NSArray *)obSound;
-            int numTypes = [aSound count];
-            int nRandIndex = random() % numTypes;
+            NSUInteger numTypes = [aSound count];
+            NSUInteger nRandIndex = random() % numTypes;
             strSound = [aSound objectAtIndex:nRandIndex];
         }
         else
@@ -188,27 +187,16 @@ static MRAudio     *m_sSingleton = nil;
     }
 
 
-	if (m_audioVoice.playing == YES)
-	{
-		MROpenAL *openAL = [MROpenAL sharedMyOpenAL];
-		[openAL setVolume:m_flSoundsVolume * 0.5f * flCustomVolume];
-	}
-	else
-	{
-		MROpenAL *openAL = [MROpenAL sharedMyOpenAL];
-		[openAL setVolume:m_flSoundsVolume * flCustomVolume];
-	}
-
-
-	[[MROpenAL sharedMyOpenAL] playSoundWithKey:strSound];
+    float gain=m_flSoundsVolume*flCustomVolume*(m_audioVoice.playing?.5f:1.f);
+    for(AVAudioPlayer *sound in m_dictSounds.allValues)sound.volume=gain;
+    AVAudioPlayer *sound=m_dictSounds[strSound];sound.currentTime=0;[sound play];
 	return YES;
 }
 
 - (void)soundsSetVolume:(float)flPercent
 {
 	m_flSoundsVolume = flPercent;
-	MROpenAL *openAL = [MROpenAL sharedMyOpenAL];
-	[openAL setVolume:m_flSoundsVolume];
+    for(AVAudioPlayer *sound in m_dictSounds.allValues)sound.volume=flPercent;
 }
 
 - (float)soundsGetVolume

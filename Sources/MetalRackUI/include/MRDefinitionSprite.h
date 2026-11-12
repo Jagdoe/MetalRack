@@ -186,7 +186,7 @@ typedef enum {
 - (void)setTextColor:(MRColor3B)color;
 - (MRTextLabel*)setText:(NSString *)strText;
 - (MRTextLabel*)setText:(NSString *)strText atPosition:(CGPoint)Position;
-- (MRTextLabel*)setText:(NSString *)strText atPosition:(CGPoint)Position withAlignment:(UITextAlignment)alignment;
+- (MRTextLabel*)setText:(NSString *)strText atPosition:(CGPoint)Position withAlignment:(NSTextAlignment)alignment;
 - (void)setLabelVisible:(BOOL)fVisible;
 
 // Acessors.
@@ -228,4 +228,5 @@ typedef enum {
 // Clean-up stuff.
 - (void)suicide;
 
+- (NSComparisonResult)compareValue:(MRDefinitionSprite *)other;
 @end

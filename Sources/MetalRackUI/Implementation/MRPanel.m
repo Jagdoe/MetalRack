@@ -80,7 +80,7 @@
 {
     // Panel
 	float flIPadFactor = 4.0f;
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+    if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad)
         flIPadFactor = 8.0f;
 
     [m_sprTop setAnchorPoint:MRPoint(0.5f, 1.0f)];

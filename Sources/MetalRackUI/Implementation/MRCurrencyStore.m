@@ -175,7 +175,7 @@ static BOOL sfInitted = NO;
 	for (NSString *strItem in defCosts)
 	{
 		// What is the required cost of this currency?
-		int nCost = [[defCosts objectForKey:strItem] integerValue];
+		int nCost = [[defCosts objectForKey:strItem] intValue];
 
 		[self adjustCurrency:strItem withDelta:(-nCost)];
 	}
@@ -189,7 +189,7 @@ static BOOL sfInitted = NO;
 {
 	NSMutableString *strCosts = [NSMutableString stringWithString:@"Cost: "];
 	{
-		int nNumCosts = [defCosts count];
+		NSUInteger nNumCosts = [defCosts count];
 		if (nNumCosts > 0)
 		{
 			MRDefinitions *defsMan = [MRDefinitions sharedDefsManager];
@@ -199,7 +199,7 @@ static BOOL sfInitted = NO;
 				// Get the title and value for this...
 				NSDictionary *defCostItem = [defsMan getDefByClass:ENTRY_CURRENCY Type:strItem];
 				NSString *strName = [defCostItem objectForKey:ENTRY_NAME];
-				int nCost = [[defCosts objectForKey:strItem] integerValue];
+				int nCost = [[defCosts objectForKey:strItem] intValue];
 				NSString *strCostItem = [NSString stringWithFormat:@"%d %@", nCost, strName];
 				[strCosts appendString:strCostItem];
 				if (nItem < nNumCosts)

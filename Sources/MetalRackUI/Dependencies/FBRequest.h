@@ -35,7 +35,7 @@ typedef NSUInteger FBRequestState;
   NSString*             _url;
   NSString*             _httpMethod;
   NSMutableDictionary*  _params;
-  NSURLConnection*      _connection;
+  NSURLSessionDataTask*      _connection;
   NSMutableData*        _responseText;
   FBRequestState        _state;
   NSError*              _error;
@@ -61,7 +61,7 @@ typedef NSUInteger FBRequestState;
  * standard Objective-C object-to-string conversion facilities.
  */
 @property(nonatomic,retain) NSMutableDictionary* params;
-@property(nonatomic,retain) NSURLConnection*  connection;
+@property(nonatomic,retain) NSURLSessionDataTask*  connection;
 @property(nonatomic,retain) NSMutableData* responseText;
 @property(nonatomic,readonly) FBRequestState state;
 

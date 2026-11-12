@@ -1,0 +1,31 @@
+{
+  "products": [
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "100001",
+      "localizations": [
+        {
+          "description": "A bunch of acorns for purchasing stuff!",
+          "displayName": "A bunch of acorns!",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "gnomes0_currency_0",
+      "referenceName": "gnomes0_currency_0",
+      "type": "Consumable"
+    }
+  ],
+  "settings": {
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [],
+  "version": {
+    "major": 3,
+    "minor": 0
+  },
+  "identifier": "84D6E02C-AC5F-4B58-9C77-C3E50DADE1B9",
+  "nonRenewingSubscriptions": []
+}

@@ -225,14 +225,14 @@ static MRContextHelp	*sgHelpOb = nil;
 			CGSize size = CGSizeMake(sizeButton.width * flTextWidth, sizeButton.height);
 			NSString *strFont = @"Helvetica-Bold";
 			UIFont *font = [UIFont fontWithName:strFont size:flFontSize];
-			size = [strText sizeWithFont:font constrainedToSize:size lineBreakMode:UILineBreakModeWordWrap];
+			size = [strText boundingRectWithSize:size options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:font} context:nil].size;
 
-			textTitle = [MRSystemText labelWithString:strText dimensions:size alignment:UITextAlignmentCenter
+			textTitle = [MRSystemText labelWithString:strText dimensions:size alignment:NSTextAlignmentCenter
 															 fontName:strFont fontSize:flFontSize];
 			[textTitle setColor:MRRGB(0, 0, 0)];
 			[textTitle setAnchorPoint:MRPoint(0.5f, 0.5f)];
 
-			MRSystemText *highlightText = [MRSystemText labelWithString:strText dimensions:size alignment:UITextAlignmentCenter
+			MRSystemText *highlightText = [MRSystemText labelWithString:strText dimensions:size alignment:NSTextAlignmentCenter
 													   fontName:strFont fontSize:flFontSize];
 			[highlightText setAnchorPoint:MRPoint(0.0f, 0.0f)];
 			[highlightText setPosition:MRPoint(-1, 1)];

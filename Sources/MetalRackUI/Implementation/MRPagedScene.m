@@ -1,6 +1,7 @@
 #include <TargetConditionals.h>
 #if TARGET_OS_IOS
 #import <UIKit/UIKit.h>
+#import "MRSelector.h"
 //
 //  PagedScene.m
 //  Befuddled2
@@ -69,7 +70,7 @@
     if (m_selOnChanged != nil)
     {
         if (nPreviousPage != nCurrentPage)
-            [self performSelector:m_selOnChanged];
+            MRInvokeCallback(self, m_selOnChanged, 0, nil, nil);
     }
 
     [self updatePageDots:abs(nCurrentPage)];

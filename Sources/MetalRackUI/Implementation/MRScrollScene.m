@@ -155,14 +155,14 @@
 
 	// Create any decorative sprites.
 	NSArray *arrSprites = [dictSet objectForKey:MR_ENTRY_SPRITES];
-	int nSprites = [arrSprites count];
+	NSUInteger nSprites = [arrSprites count];
 	for (int i = 0; i < nSprites; ++i)
 	{
 		NSDictionary *dictSprite = [arrSprites objectAtIndex:i];
 		id obSet = [dictSprite objectForKey:MR_ENTRY_SPRITE_SET];
 		if (obSet != nil)
 		{
-			int nSetRequired = [obSet integerValue];
+			int nSetRequired = [obSet intValue];
 			if (nSetRequired > 0)//  && [MRSceneHost isSetUnlocked:nSetRequired] == NO)
 				continue;
 		}

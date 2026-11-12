@@ -443,8 +443,8 @@ static MRDefinitions     *m_sSingleton = nil;
 	if ([obMessage isKindOfClass:[NSArray class]] == YES)
 	{
 		NSArray *aMessages = (NSArray *)obMessage;
-		int numEntries = [aMessages count];
-		int nRandIndex = random() % numEntries;
+		NSUInteger numEntries = [aMessages count];
+		NSUInteger nRandIndex = random() % numEntries;
 		strMessage = [aMessages objectAtIndex:nRandIndex];
 	}
 	else
@@ -586,7 +586,7 @@ static MRDefinitions     *m_sSingleton = nil;
 // Get by object group.
 - (int)getNumObjectGroups
 {
-    return [m_dictGroupLookup count];
+    return (int)[m_dictGroupLookup count];
 }
 
 - (NSArray *)getArrayOfDefsByGroupName:(NSString*)strGroup
@@ -597,7 +597,7 @@ static MRDefinitions     *m_sSingleton = nil;
 - (NSArray *)getArrayOfNamesByGroupName:(NSString*)strGroup
 {
     NSMutableArray *arrDefs = [m_dictGroupLookup objectForKey:strGroup];
-    int nItems = [arrDefs count];
+    NSUInteger nItems = [arrDefs count];
     NSMutableArray *arrNames = [NSMutableArray arrayWithCapacity:nItems];
     for (NSDictionary *defItem in arrDefs)
     {
@@ -624,7 +624,7 @@ static MRDefinitions     *m_sSingleton = nil;
 - (NSArray *)getArrayOfNamesByGroupIndex:(int)nIndex
 {
     NSArray *arrDefs = [self getArrayOfDefsByGroupIndex:nIndex];
-    int nItems = [arrDefs count];
+    NSUInteger nItems = [arrDefs count];
     NSMutableArray *arrNames = [NSMutableArray arrayWithCapacity:nItems];
     for (NSDictionary *defItem in arrDefs)
     {
@@ -651,7 +651,7 @@ static MRDefinitions     *m_sSingleton = nil;
     {
         NSDictionary *dictEntry = [self getDefByName:strEntry];
         NSUInteger nHash = [strEntry hash];
-        NSValue *valueHash = [NSNumber numberWithUnsignedInt:nHash];
+        NSValue *valueHash = [NSNumber numberWithUnsignedInteger:nHash];
 //        NSLog(@"Hash: %@,%@", strEntry, valueHash);
         [m_dictHashLookup setObject:dictEntry forKey:valueHash];
     }
@@ -662,7 +662,7 @@ static MRDefinitions     *m_sSingleton = nil;
     if (m_dictHashLookup == nil)
         return nil;
 
-    NSValue *valueHash = [NSNumber numberWithUnsignedInt:nHash];
+    NSValue *valueHash = [NSNumber numberWithUnsignedInteger:nHash];
     NSDictionary *dictDef = [m_dictHashLookup objectForKey:valueHash];
     return dictDef;
 }
@@ -679,8 +679,8 @@ static MRDefinitions     *m_sSingleton = nil;
 //        if ([strAlt rangeOfString:@"(Alt)"].location != NSNotFound)
 //            return [self getDefByName:strAlt];
 //    }
-    int nCount = [aAlts count] + 1;
-    int nIndex = random() % nCount;
+    NSUInteger nCount = [aAlts count] + 1;
+    NSUInteger nIndex = random() % nCount;
     if (nIndex == 0)
     {
         return dictOriginal;
