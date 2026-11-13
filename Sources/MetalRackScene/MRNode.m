@@ -3,6 +3,7 @@
 #import "MRSceneEnvironment.h"
 #import "MRNodeScheduling.h"
 #include <math.h>
+#import <objc/runtime.h>
 
 @interface MRNode () {
     NSMutableArray<MRNode *> *_children;
@@ -12,11 +13,15 @@
     NSArray<MRNode *> *_childSnapshot, *_orderedChildren;
     CGAffineTransform _cachedLocalTransform, _cachedWorldTransform;
     BOOL _localTransformValid, _worldTransformValid;
+    NSUInteger _timeWork; // Actions plus nodes with a custom advanceTime implementation, throughout this subtree.
 }
 @end
 @implementation MRNode
 - (instancetype)init {
-    if ((self=[super init])) { _children=[NSMutableArray new]; _actions=[NSMutableArray new]; _scaleX=1; _scaleY=1; _visible=YES; _tag=-1; }
+    if ((self=[super init])) { _children=[NSMutableArray new]; _actions=[NSMutableArray new]; _scaleX=1; _scaleY=1; _visible=YES; _tag=-1;
+        // Preserve subclass clocks even when they do not own actions.
+        _timeWork=class_getMethodImplementation(object_getClass(self),@selector(advanceTime:))!=class_getMethodImplementation(MRNode.class,@selector(advanceTime:));
+    }
     return self;
 }
 + (instancetype)node { return [[self alloc] init]; }
@@ -25,6 +30,15 @@
     for (MRNode *child in _children) { child->_parent=nil; [child invalidateWorldTransform]; }
     [self stopAllActions];
 
+}
+// Update only on action/tree mutations; idle nodes do no per-frame bookkeeping.
+- (void)mrAdjustTimeWork:(NSInteger)delta {
+    if (!delta) return;
+    for (MRNode *node=self;node;node=node->_parent) {
+        NSAssert(delta>=0 || node->_timeWork>=(NSUInteger)(-delta),@"Unbalanced subtree action work");
+        if (delta<0) node->_timeWork-=(NSUInteger)(-delta);
+        else node->_timeWork+=(NSUInteger)delta;
+    }
 }
 - (BOOL)isInScene { return _environment!=nil && !_leavingEnvironment; }
 - (void)attachToEnvironment:(MRSceneEnvironment *)environment {
@@ -93,18 +107,20 @@
     for (MRNode *ancestor=self; ancestor; ancestor=ancestor.parent)
         NSAssert(ancestor!=child,@"A scene tree cannot contain cycles");
     child.zOrder=z; child.tag=tag; [_children addObject:child]; child->_parent=self;
+    [self mrAdjustTimeWork:(NSInteger)child->_timeWork];
     [child invalidateWorldTransform];
     _childSnapshot=nil; _orderedChildren=nil;
     if (self.inScene) [child attachToEnvironment:_environment];
 }
 // Internal scene-root adoption keeps lifecycle/callback state continuous.
 - (void)mrRemoveChildPreservingAttachment:(MRNode *)child {
-    if(child->_parent!=self)return;child->_parent=nil;[child invalidateWorldTransform];[_children removeObjectIdenticalTo:child];
+    if(child->_parent!=self)return;[self mrAdjustTimeWork:-(NSInteger)child->_timeWork];child->_parent=nil;[child invalidateWorldTransform];[_children removeObjectIdenticalTo:child];
     _childSnapshot=nil; _orderedChildren=nil;
 }
 - (void)removeChild:(MRNode *)child {
     if (child->_parent!=self) return;
     [child detachFromEnvironment];
+    [self mrAdjustTimeWork:-(NSInteger)child->_timeWork];
     child->_parent=nil; [child invalidateWorldTransform]; [_children removeObjectIdenticalTo:child];
     _childSnapshot=nil; _orderedChildren=nil;
 }
@@ -159,11 +175,11 @@
 - (MRAction *)runAction:(MRAction *)action {
     NSParameterAssert(action);
     NSAssert(!action.target,@"An action instance can only run on one node at a time");
-    [_actions addObject:action]; [action startWithTarget:self]; return action;
+    [_actions addObject:action]; [self mrAdjustTimeWork:1]; [action startWithTarget:self]; return action;
 }
 - (void)stopAction:(MRAction *)action {
     if (![_actions containsObject:action]) return;
-     [_actions removeObjectIdenticalTo:action]; [action stop];
+     [_actions removeObjectIdenticalTo:action]; [self mrAdjustTimeWork:-1]; [action stop];
 }
 - (MRAction *)actionByTag:(NSInteger)tag {
     for (MRAction *action in _actions) if (action.tag==tag) return action;
@@ -172,10 +188,12 @@
 - (void)stopActionByTag:(NSInteger)tag { MRAction *action=[self actionByTag:tag]; if (action) [self stopAction:action]; }
 - (void)stopAllActions {
     NSArray *saved=([_actions copy]); [_actions removeAllObjects];
+    [self mrAdjustTimeWork:-(NSInteger)saved.count];
     for (MRAction *action in saved) [action stop];
 }
 - (void)advanceTime:(float)seconds {
     NSParameterAssert(isfinite(seconds) && seconds>=0);
+    if (!_timeWork) return;
     if (!_actionsPaused && _actions.count) {
         NSArray *saved=([_actions copy]);
         for (MRAction *action in saved) {
@@ -185,7 +203,9 @@
         }
     }
     NSArray *children=self.children;
-    for (MRNode *child in children) if (child.parent==self) [child advanceTime:seconds];
+    // Read live work counts in the original snapshot order: an earlier callback
+    // may start an action on a previously dormant later sibling in this tick.
+    for (MRNode *child in children) if (child->_timeWork && child.parent==self) [child advanceTime:seconds];
 }
 - (void)visit:(MRRenderContext *)context {
     if (!_visible) return;
