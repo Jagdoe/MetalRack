@@ -16,6 +16,21 @@
 
 #import "MRUtilities.h"
 
+// Player preparation/playback can synchronously activate AVAudioSession. Keep
+// native player mutations and category changes ordered off the UI thread.
+@interface MRAudio () {
+    dispatch_queue_t m_playbackQueue;
+    BOOL m_musicPlaybackRequested;
+}
+- (void)handleFinishedPlayer:(AVAudioPlayer *)player successfully:(BOOL)flag;
+@end
+
+static void MRConfigureAudioCategory(NSString *category) {
+    NSError *error=nil;
+    if(![AVAudioSession.sharedInstance setCategory:category error:&error])
+        NSLog(@"Unable to configure audio category %@: %@",category,error);
+}
+
 @implementation MRAudio
 
 #define INITIAL_ARRAY_CAPACITY	(64)
@@ -35,15 +50,14 @@ static MRAudio     *m_sSingleton = nil;
 {
 	NSLog(@"  AM: Beginning init.");
 
-    AVAudioSession *session = [AVAudioSession sharedInstance];
-    NSError *error;
-    [session setCategory:AVAudioSessionCategoryAmbient error:&error];
+    self=[super init];if(!self)return nil;
+    m_playbackQueue=dispatch_queue_create("com.metalrack.audio-playback",DISPATCH_QUEUE_SERIAL);
+    [self performPlayback:^{MRConfigureAudioCategory(AVAudioSessionCategoryAmbient);}];
 
 	m_audioVoice = nil;
     m_strCurrentSong = nil;
 	m_flSoundsVolume = 1.0f;
 	m_flMusicVolume = 0.25f;
-	self = [super init];
 	NSLog(@"  AM: Done with super init.");
 	[self soundsInit];
 	NSLog(@"  AM: Done with soundsInit.");
@@ -51,6 +65,14 @@ static MRAudio     *m_sSingleton = nil;
 	NSLog(@"  AM: Done with musicInit.");
 	return self;
 }
+
+- (void)performPlayback:(void (^)(void))operation
+{
+    if(!operation)return;
+    dispatch_async(m_playbackQueue,^{@autoreleasepool{operation();}});
+}
+
+- (BOOL)musicPlaybackRequested { return m_musicPlaybackRequested; }
 
 - (void)dealloc
 {
@@ -69,7 +91,9 @@ static MRAudio     *m_sSingleton = nil;
     NSError *error=nil;
     AVAudioPlayer *player=[[AVAudioPlayer alloc] initWithContentsOfURL:url error:&error];
     if(!player){NSLog(@"Unable to load sound %@: %@",strSound,error);return;}
-    player.volume=m_flSoundsVolume;[player prepareToPlay];m_dictSounds[strSound]=player;
+    float volume=m_flSoundsVolume;
+    [self performPlayback:^{player.volume=volume;[player prepareToPlay];}];
+    m_dictSounds[strSound]=player;
 }
 
 // Set up our sound stuff.
@@ -127,7 +151,8 @@ static MRAudio     *m_sSingleton = nil;
 - (void)soundsDestroy
 {
 	// Stop and release all cached effects.
-    for(AVAudioPlayer *sound in m_dictSounds.allValues)[sound stop];
+    NSArray *players=m_dictSounds.allValues;
+    [self performPlayback:^{for(AVAudioPlayer *sound in players)[sound stop];}];
     [m_dictSounds removeAllObjects];
 }
 
@@ -187,16 +212,22 @@ static MRAudio     *m_sSingleton = nil;
     }
 
 
-    float gain=m_flSoundsVolume*flCustomVolume*(m_audioVoice.playing?.5f:1.f);
-    for(AVAudioPlayer *sound in m_dictSounds.allValues)sound.volume=gain;
-    AVAudioPlayer *sound=m_dictSounds[strSound];sound.currentTime=0;[sound play];
+    float volume=m_flSoundsVolume*flCustomVolume;
+    AVAudioPlayer *voice=m_audioVoice,*sound=m_dictSounds[strSound];
+    NSArray *players=m_dictSounds.allValues;
+    [self performPlayback:^{
+        float gain=volume*(voice.playing?.5f:1.f);
+        for(AVAudioPlayer *player in players)player.volume=gain;
+        sound.currentTime=0;[sound play];
+    }];
 	return YES;
 }
 
 - (void)soundsSetVolume:(float)flPercent
 {
 	m_flSoundsVolume = flPercent;
-    for(AVAudioPlayer *sound in m_dictSounds.allValues)sound.volume=flPercent;
+    NSArray *players=m_dictSounds.allValues;
+    [self performPlayback:^{for(AVAudioPlayer *sound in players)sound.volume=flPercent;}];
 }
 
 - (float)soundsGetVolume
@@ -237,21 +268,20 @@ static MRAudio     *m_sSingleton = nil;
 														   error: nil];
 	(void)0;
 
-	[m_audioVoice prepareToPlay];
-	[m_audioVoice setDelegate: self];
-
-	m_audioVoice.numberOfLoops = 0;
-	m_audioVoice.volume		= m_flSoundsVolume;
-
-
-	[m_audioVoice play];
+    AVAudioPlayer *voice=m_audioVoice;voice.delegate=self;
+    float volume=m_flSoundsVolume;
+    [self performPlayback:^{
+        voice.numberOfLoops=0;voice.volume=volume;
+        [voice prepareToPlay];[voice play];
+    }];
 }
 
 - (void)voiceStop
 {
 	if (m_audioVoice != nil)
 	{
-		[m_audioVoice stop];
+        AVAudioPlayer *voice=m_audioVoice;
+        [self performPlayback:^{[voice stop];}];
 		(void)0;
 		m_audioVoice = nil;
 	}
@@ -261,10 +291,8 @@ static MRAudio     *m_sSingleton = nil;
 {
 	if (m_audioVoice != nil)
 	{
-		if (fPause == YES)
-			[m_audioVoice pause];
-		else
-			[m_audioVoice play];
+        AVAudioPlayer *voice=m_audioVoice;
+        [self performPlayback:^{if(fPause)[voice pause];else [voice play];}];
 	}
 }
 
@@ -302,8 +330,8 @@ static MRAudio     *m_sSingleton = nil;
     float flAdjustedVolume = 0.25f * flPercent;
     if (fStore == YES)
         m_flMusicVolume				= flAdjustedVolume;
-	if (m_audioPlayer != nil)
-		m_audioPlayer.volume		= flAdjustedVolume;
+    AVAudioPlayer *player=m_audioPlayer;
+    [self performPlayback:^{player.volume=flAdjustedVolume;}];
 }
 
 - (float)musicGetVolume
@@ -334,7 +362,8 @@ static MRAudio     *m_sSingleton = nil;
 
 	if (m_audioPlayer != nil)
 	{
-		[m_audioPlayer stop];
+        AVAudioPlayer *previous=m_audioPlayer;
+        [self performPlayback:^{[previous stop];}];
 		(void)0;
 	}
 
@@ -342,19 +371,13 @@ static MRAudio     *m_sSingleton = nil;
 														  error: nil];
 	(void)0;
 
-	[m_audioPlayer prepareToPlay];
-	[m_audioPlayer setDelegate: self];
-
-	// Play indefinitely.
-	m_audioPlayer.numberOfLoops = 0;
-	m_audioPlayer.volume		= m_flMusicVolume;
-
-
-    AVAudioSession *session = [AVAudioSession sharedInstance];
-    NSError *error;
-    [session setCategory:AVAudioSessionCategorySoloAmbient error:&error];
-
-	[m_audioPlayer play];
+    AVAudioPlayer *player=m_audioPlayer;player.delegate=self;
+    float volume=m_flMusicVolume;m_musicPlaybackRequested=YES;
+    [self performPlayback:^{
+        MRConfigureAudioCategory(AVAudioSessionCategorySoloAmbient);
+        player.numberOfLoops=0;player.volume=volume;
+        [player prepareToPlay];[player play];
+    }];
 }
 
 - (void)musicPlay:(NSString *)strMusicFile
@@ -382,6 +405,17 @@ static MRAudio     *m_sSingleton = nil;
 
 - (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag
 {
+    // Playlist/request state belongs to the caller's main run loop. Native
+    // completion delivery must not race those requests from an audio thread.
+    if(!NSThread.isMainThread) {
+        dispatch_async(dispatch_get_main_queue(),^{[self handleFinishedPlayer:player successfully:flag];});
+        return;
+    }
+    [self handleFinishedPlayer:player successfully:flag];
+}
+
+- (void)handleFinishedPlayer:(AVAudioPlayer *)player successfully:(BOOL)flag
+{
 	// Did our music end?
 	if (player == m_audioPlayer)
 	{
@@ -400,19 +434,12 @@ static MRAudio     *m_sSingleton = nil;
 
 - (void)musicEnable:(BOOL)fEnable
 {
-	// We'll just pause or resume playback, keeping our hardware
-	// ready.
-	BOOL fIsPlaying = m_audioPlayer.playing;
-	if (fEnable == YES)
-	{
-		if (fIsPlaying == NO)
-			[m_audioPlayer play];
-	}
-	else
-	{
-		if (fIsPlaying == YES)
-			[m_audioPlayer pause];
-	}
+    m_musicPlaybackRequested=fEnable;
+    AVAudioPlayer *player=m_audioPlayer;
+    [self performPlayback:^{
+        if(fEnable){if(!player.playing)[player play];}
+        else if(player.playing)[player pause];
+    }];
 }
 
 - (void)musicDestroy
@@ -420,12 +447,9 @@ static MRAudio     *m_sSingleton = nil;
 	// Our individual sounds should be auto-released, so just clear the array.
 	//	[m_arrSounds release];
 
-	(void)0;
-	m_audioPlayer = nil;
-
-    AVAudioSession *session = [AVAudioSession sharedInstance];
-    NSError *error;
-    [session setCategory:AVAudioSessionCategoryAmbient error:&error];
+    AVAudioPlayer *player=m_audioPlayer;
+    m_audioPlayer=nil;m_musicPlaybackRequested=NO;
+    [self performPlayback:^{[player stop];MRConfigureAudioCategory(AVAudioSessionCategoryAmbient);}];
 }
 
 

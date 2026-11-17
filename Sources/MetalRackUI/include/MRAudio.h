@@ -46,6 +46,14 @@
 - (void)musicSetVolume:(float)flPercent andStore:(BOOL)fStore;
 - (float)musicGetVolume;
 
+// Submit native player mutations without blocking the main thread. Commands
+// execute FIFO on the shared serial playback queue. Read game/UI state before
+// submission and return results to the main queue before changing that state.
+- (void)performPlayback:(void (^)(void))operation;
+// Desired music state, including a start/resume command not yet executed.
+- (BOOL)musicPlaybackRequested;
+
+
 - (void)soundsInit;
 - (void)soundsDestroy;
 - (void)musicInit;
