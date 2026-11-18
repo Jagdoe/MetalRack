@@ -154,14 +154,21 @@
 -(void) step:(MRTime) dt
 {
 	[innerAction_ step: dt];
-	if( [innerAction_ isDone] ) {
-		MRTime diff = innerAction_.elapsed - innerAction_.duration;
-		[innerAction_ startWithTarget:target_];
-
-		// to prevent jerk. issue #390, 1247
-		[innerAction_ step: 0.0f];
-		[innerAction_ step: diff];
-	}
+    // A catch-up tick can span many cycles. Leaving the inner action beyond
+    // its duration makes later normal frames repeatedly sample t=1, freezing
+    // oscillating limbs until that accumulated overrun has drained away.
+    while (target_ && [innerAction_ isDone]) {
+        MRTime duration=innerAction_.duration;
+        MRTime remainder=MAX(0,innerAction_.elapsed-duration);
+        [innerAction_ startWithTarget:target_];
+        [innerAction_ step:0]; // Preserve the interval's initial-tick contract.
+        // Zero-duration loops run at most once per update, never infinitely.
+        if (duration<=FLT_EPSILON || !target_) break;
+        [innerAction_ step:remainder];
+        // A callback may stop this repeat or replace the owner's actions.
+        // Consume every completed cycle so relative motion and callbacks are
+        // preserved, rather than dropping them with a modulo-only shortcut.
+    }
 }
 
 

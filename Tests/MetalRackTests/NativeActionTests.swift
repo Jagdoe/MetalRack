@@ -75,4 +75,53 @@ final class NativeActionTests: XCTestCase {
         XCTAssertNil(released, "Actions must not retain their owning node")
     }
 
+    func testRepeatForeverConsumesEveryCompletedCycleAndRemainder() {
+        let actor = MRNode()
+        let repeatAction = MRRepeatForever(action: MRMoveBy(duration: 1, position: CGPoint(x: 10, y: 0)))!
+        actor.run(repeatAction)
+        actor.advanceTime(0)
+        actor.advanceTime(3.25)
+        XCTAssertEqual(actor.position.x, 32.5, accuracy: 0.0001)
+        XCTAssertEqual(repeatAction.innerAction.elapsed, 0.25, accuracy: 0.0001)
+        actor.advanceTime(0.1)
+        XCTAssertEqual(actor.position.x, 33.5, accuracy: 0.0001)
+    }
+
+    func testOscillatingLimbMovesImmediatelyAfterLargeCatchupSteps() {
+        let limb = MRNode()
+        let cycle = MRSequence(one: MRRotateBy(duration: 0.2, angle: 30),
+                               two: MRRotateBy(duration: 0.2, angle: -30))!
+        let repeatAction = MRRepeatForever(action: cycle)!
+        limb.run(repeatAction)
+        limb.advanceTime(0)
+        limb.advanceTime(20)
+        limb.advanceTime(20)
+        XCTAssertLessThan(repeatAction.innerAction.elapsed, cycle.duration)
+        let before = limb.rotation
+        limb.advanceTime(0.04)
+        XCTAssertGreaterThan(abs(limb.rotation - before), 1)
+    }
+
+    func testRepeatCatchupHonorsCancellationFromInnerCallback() {
+        let actor = MRNode()
+        var completions = 0
+        let callback = MRCallBlock(block: {
+            completions += 1
+            if completions == 2 { actor.stopAllActions() }
+        })!
+        actor.run(MRRepeatForever(action: MRSequence(one: MRDelayTime(duration: 0.1), two: callback)))
+        actor.advanceTime(0)
+        actor.advanceTime(10)
+        XCTAssertEqual(completions, 2)
+        XCTAssertEqual(actor.numberOfRunningActions, 0)
+    }
+
+    func testZeroDurationRepeatRemainsBounded() {
+        let actor = MRNode()
+        actor.run(MRRepeatForever(action: MRDelayTime(duration: 0)))
+        actor.advanceTime(0)
+        actor.advanceTime(10)
+        XCTAssertEqual(actor.numberOfRunningActions, 1)
+    }
+
 }
