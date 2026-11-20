@@ -10,4 +10,5 @@ let package = Package(name: "MetalRack", platforms: [.macOS(.v14), .iOS(.v17)],
               .target(name: "MetalRackImageProcessing"),
               .target(name: "MetalRack", dependencies: ["MetalRackImageProcessing", "MetalRackScene"], resources: [.copy("Resources/QuadShaders.txt")]),
               .testTarget(name: "MetalRackServicesTests", dependencies: ["MetalRackServices"], exclude: ["README.md"], resources: [.copy("Store.storekit")]),
-              .testTarget(name: "MetalRackTests", dependencies: ["MetalRack", "MetalRackImageProcessing", "MetalRackScene"])])
+              .target(name: "MetalRackUITestHost", path: "Tests/MetalRackUITestHost"),
+              .testTarget(name: "MetalRackTests", dependencies: ["MetalRack", "MetalRackImageProcessing", "MetalRackScene", "MetalRackUI", "MetalRackUITestHost"])])

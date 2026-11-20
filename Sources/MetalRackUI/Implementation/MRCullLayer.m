@@ -35,11 +35,9 @@
     [super removeChild:node cleanup:cleanup];
 }
 
-- (void)visit:(MRRenderContext *)context {
-    for (MRDefinitionSprite *child in self.children)
-        if ([child isKindOfClass:[MRDefinitionSprite class]]) [child updateWorldPositionCache];
-    [super visit:context];
-}
+// MRDefinitionSprite.visit refreshes its world position before its culling
+// decision, including offscreen sprites. Do not repeat that pass here: the
+// layer only owns enabling/disabling culling as children enter or leave.
 
 @end
 
