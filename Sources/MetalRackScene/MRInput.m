@@ -30,12 +30,14 @@
 
 @implementation MRInput {
     NSMutableArray<MRInputRegistration *> *_registrations;
+    NSHashTable *_knownReceivers;
     NSMutableDictionary<NSNumber *,MRPointerCapture *> *_captures;
     NSUInteger _order;
 }
 - (instancetype)init {
     if ((self=[super init])) {
         _enabled=YES; _registrations=[NSMutableArray array]; _captures=[NSMutableDictionary dictionary];
+        _knownReceivers=[NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory|NSPointerFunctionsObjectPointerPersonality];
     }
     return self;
 }
@@ -43,6 +45,7 @@
     NSParameterAssert(receiver);
     // Re-registration is explicit replacement and cancels old captures.
     [self removeReceiver:receiver];
+    [_knownReceivers addObject:receiver];
     MRInputRegistration *entry=[MRInputRegistration new];
     entry.receiver=receiver; entry.priority=priority; entry.swallows=swallows; entry.order=_order++;
     [_registrations addObject:entry];
@@ -52,7 +55,11 @@
     }];
 }
 - (void)removeReceiver:(id<MRPointerReceiver>)receiver {
-    if (!receiver) return;
+    // Every scene node detaches through this method, including glyphs that
+    // never receive input. A weak identity history proves these negative cases
+    // without reading every registered weak receiver. Keep the original positive
+    // path (and history until receiver deallocation) for reentrant cancellation.
+    if (!receiver || ![_knownReceivers containsObject:receiver]) return;
     for (MRInputRegistration *entry in [_registrations copy]) {
         if (entry.receiver!=receiver) continue;
         entry.removed=YES;

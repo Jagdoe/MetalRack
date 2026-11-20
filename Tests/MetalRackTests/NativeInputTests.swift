@@ -14,6 +14,13 @@ private final class PointerReceiver: NSObject, MRPointerReceiver {
     func pointerEnded(_ event: MRPointerEvent) { record?("\(name):end:\(event.identifier)"); ended?(event) }
     func pointerCancelled(_ event: MRPointerEvent) { record?("\(name):cancel:\(event.identifier)"); cancelled?(event) }
 }
+private final class EqualPointerReceiver: NSObject, MRPointerReceiver {
+    var cancels = 0
+    override var hash: Int { 0 }
+    override func isEqual(_ object: Any?) -> Bool { object is EqualPointerReceiver }
+    func pointerBegan(_ event: MRPointerEvent) -> Bool { true }
+    func pointerCancelled(_ event: MRPointerEvent) { cancels += 1 }
+}
 final class NativeInputTests: XCTestCase {
     private func event(_ id: UInt, x: CGFloat = 10) -> MRPointerEvent {
         MRPointerEvent(identifier: id,position: CGPoint(x: x,y: 20),previousPosition: CGPoint(x: x-1,y: 19),timestamp: 1)
@@ -67,6 +74,44 @@ final class NativeInputTests: XCTestCase {
         next.begin = { _ in input.isEnabled = false; return true }
         input.begin(event(3))
         XCTAssertEqual(events.suffix(2),["next:begin:3","next:cancel:3"])
+    }
+    func testRemovingNeverRegisteredNodesDoesNotAffectCaptures() {
+        let input = MRInput(), active = PointerReceiver("active"), unused = PointerReceiver("glyph")
+        var events: [String] = []
+        active.record = { events.append($0) }
+        input.add(receiver: active, priority: 0, swallows: true)
+        input.begin(event(1))
+        for _ in 0..<1000 { input.remove(receiver: unused) }
+        input.move(event(1)); input.end(event(1))
+        XCTAssertEqual(events, ["active:begin:1", "active:move:1", "active:end:1"])
+        input.remove(receiver: active); input.remove(receiver: active)
+        input.begin(event(2)); input.end(event(2))
+        XCTAssertEqual(events.count, 3)
+        input.add(receiver: active, priority: 0, swallows: true)
+        input.begin(event(3)); input.remove(receiver: active)
+        XCTAssertEqual(events.suffix(2), ["active:begin:3", "active:cancel:3"])
+    }
+    func testWeakHistoryUsesIdentityForEqualReceivers() {
+        let input = MRInput(), remaining = EqualPointerReceiver()
+        autoreleasepool {
+            let transient = EqualPointerReceiver()
+            input.add(receiver: transient, priority: 0, swallows: false)
+            input.add(receiver: remaining, priority: 0, swallows: false)
+        }
+        input.begin(event(1)); input.remove(receiver: remaining)
+        XCTAssertEqual(remaining.cancels, 1)
+        input.end(event(1))
+        XCTAssertEqual(remaining.cancels, 1)
+    }
+    func testUnregisteredRemovalBenchmark() {
+        let input = MRInput(), unused = PointerReceiver("glyph")
+        let receivers = (0..<200).map { PointerReceiver(String($0)) }
+        for receiver in receivers { input.add(receiver: receiver, priority: 0, swallows: false) }
+        let start = ProcessInfo.processInfo.systemUptime
+        for _ in 0..<10000 { input.remove(receiver: unused) }
+        print("UNREGISTERED_REMOVAL_BENCH ms=\((ProcessInfo.processInfo.systemUptime-start)*1000)")
+        input.begin(event(1)); input.end(event(1))
+        XCTAssertEqual(receivers.count, 200)
     }
     func testCoordinatesAndWeakReceiverOwnership() {
         let root = MRNode(); root.position = CGPoint(x: 10,y: 20); root.scaleX = 2; root.scaleY = 3
