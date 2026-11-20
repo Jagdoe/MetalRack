@@ -477,8 +477,8 @@
 
 -(void) startWithTarget:(MRNode *)aTarget
 {
-    MRNode *targetNode = (MRNode *)target_;
 	[super startWithTarget:aTarget];
+    MRNode *targetNode = (MRNode *)target_;
 
 	startAngle_ = [targetNode rotation];
 	if (startAngle_ > 0)

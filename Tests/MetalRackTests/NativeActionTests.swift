@@ -2,6 +2,21 @@ import XCTest
 import MetalRackScene
 
 final class NativeActionTests: XCTestCase {
+    func testRotateToStartsFromCurrentTargetAngleIncludingReuse() {
+        let action = MRRotateTo(duration: 1, angle: 40)!
+        let first = MRNode(); first.rotation = 25
+        first.run(action); first.advanceTime(0)
+        XCTAssertEqual(first.rotation, 25, accuracy: 0.0001)
+        first.advanceTime(0.5)
+        XCTAssertEqual(first.rotation, 32.5, accuracy: 0.0001)
+        first.stopAllActions()
+        let second = MRNode(); second.rotation = -30
+        second.run(action); second.advanceTime(0)
+        XCTAssertEqual(second.rotation, -30, accuracy: 0.0001)
+        second.advanceTime(0.5)
+        XCTAssertEqual(second.rotation, 5, accuracy: 0.0001)
+    }
+
     func testIntervalFirstTickPauseAndSequenceBoundaries() throws {
         let root = MRNode(), actor = MRNode()
         root.addChild(actor)
